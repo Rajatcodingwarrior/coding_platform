@@ -1,0 +1,31 @@
+import dns.resolver
+import motor.motor_asyncio
+import certifi
+from app.config import settings
+
+# ─── Force Google DNS (8.8.8.8) to bypass ISP/corporate DNS that blocks Atlas SRV ───
+_google_resolver = dns.resolver.Resolver(configure=False)
+_google_resolver.nameservers = ['8.8.8.8', '8.8.4.4']
+dns.resolver.default_resolver = _google_resolver
+
+class Database:
+    client: motor.motor_asyncio.AsyncIOMotorClient = None
+    db: motor.motor_asyncio.AsyncIOMotorDatabase = None
+
+db_instance = Database()
+
+def get_database() -> motor.motor_asyncio.AsyncIOMotorDatabase:
+    return db_instance.db
+
+async def connect_to_mongo():
+    db_instance.client = motor.motor_asyncio.AsyncIOMotorClient(
+        settings.MONGODB_URI,
+        tlsCAFile=certifi.where()
+    )
+    db_instance.db = db_instance.client[settings.DB_NAME]
+    print(f"Connected to MongoDB: {settings.DB_NAME}")
+
+async def close_mongo_connection():
+    if db_instance.client:
+        db_instance.client.close()
+        print("Closed MongoDB connection")
