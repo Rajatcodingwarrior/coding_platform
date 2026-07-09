@@ -5,6 +5,7 @@ import cloudscraper
 from bs4 import BeautifulSoup
 from bson import ObjectId
 from app.database import get_database
+from app.services.rating_system import compute_rating_and_stars
 
 logger = logging.getLogger(__name__)
 
@@ -284,13 +285,16 @@ async def sync_codeforces_data():
                     description_html = existing_q.get("description_html", "")
                 
                 # Save and always update fields that can change (like rating, tags, name)
+                cf_rating = prob.get("rating") or 800
+                rs = compute_rating_and_stars('codeforces', rating=cf_rating)
                 await db.questions.update_one(
                     {"_id": q_id},
                     {"$set": {
                         "contest_id": contest_id,
                         "index": prob_index,
                         "name": prob.get("name"),
-                        "rating": prob.get("rating") or 800, # dynamic update when Codeforces assigns it
+                        "rating": rs['rating'],
+                        "stars": rs['stars'],
                         "tags": prob.get("tags", []),
                         "points": prob.get("points"),
                         "editorial_url": editorial_url,

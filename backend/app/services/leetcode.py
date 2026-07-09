@@ -4,6 +4,7 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from app.database import get_database
+from app.services.rating_system import compute_rating_and_stars
 import re
 
 logger = logging.getLogger(__name__)
@@ -11,6 +12,7 @@ logger = logging.getLogger(__name__)
 def parse_leetcode_samples(content_html: str) -> list:
     """
     Parses example input/output test cases from LeetCode problem description HTML.
+    Handles both old format (<pre> with Input:/Output:) and new format (<div class="example-block">).
     """
     test_cases = []
     if not content_html:
@@ -18,21 +20,44 @@ def parse_leetcode_samples(content_html: str) -> list:
         
     try:
         soup = BeautifulSoup(content_html, 'html.parser')
+        
+        # ── Strategy 1: Old format — <pre> tags containing "Input:" and "Output:" ──
         pre_tags = soup.find_all('pre')
         for pre in pre_tags:
             text = pre.get_text()
-            if "Input:" in text and "Output:" in text:
-                inp_match = re.search(r'Input:\s*(.*?)\nOutput:', text, re.DOTALL)
-                out_match = re.search(r'Output:\s*(.*?)(?:\nExplanation:|\n$|$)', text, re.DOTALL)
-                
+            if "input" in text.lower() and "output" in text.lower():
+                inp_match = re.search(r'Input:\s*(.*?)\s*Output:', text, re.DOTALL | re.IGNORECASE)
+                out_match = re.search(r'Output:\s*(.*?)(?:\s*Explanation:|\s*Example|\s*$|$)', text, re.DOTALL | re.IGNORECASE)
                 inp_val = inp_match.group(1).strip() if inp_match else ""
                 out_val = out_match.group(1).strip() if out_match else ""
-                
                 if inp_val or out_val:
-                    test_cases.append({
-                        "input": inp_val,
-                        "output": out_val
-                    })
+                    test_cases.append({"input": inp_val, "output": out_val})
+        
+        # ── Strategy 2: New format — <div class="example-block"> ──
+        if not test_cases:
+            example_blocks = soup.find_all('div', class_='example-block')
+            for block in example_blocks:
+                text = block.get_text()
+                inp_match = re.search(r'Input:\s*(.*?)\s*Output:', text, re.DOTALL | re.IGNORECASE)
+                out_match = re.search(r'Output:\s*(.*?)(?:\s*Explanation:|\s*$|$)', text, re.DOTALL | re.IGNORECASE)
+                inp_val = inp_match.group(1).strip() if inp_match else ""
+                out_val = out_match.group(1).strip() if out_match else ""
+                if inp_val or out_val:
+                    test_cases.append({"input": inp_val, "output": out_val})
+        
+        # ── Strategy 3: Regex fallback on raw HTML text ──
+        if not test_cases:
+            full_text = soup.get_text()
+            pairs = re.findall(
+                r'Input:\s*(.*?)\s*Output:\s*(.*?)(?:\s*Explanation:|\s*Example\s*\d|\s*Constraints|\s*$)',
+                full_text, re.DOTALL | re.IGNORECASE
+            )
+            for inp_val, out_val in pairs:
+                inp_val = inp_val.strip()
+                out_val = out_val.strip()
+                if inp_val or out_val:
+                    test_cases.append({"input": inp_val, "output": out_val})
+                    
     except Exception as e:
         logger.error(f"Error parsing LeetCode samples: {e}")
         
@@ -185,9 +210,10 @@ async def sync_leetcode_data():
                         
                         content = q_data.get("content", "")
                         difficulty_str = q_data.get("difficulty", "Easy")
-                        # Map difficulty string to rating
-                        rating_map = {"Easy": 800, "Medium": 1200, "Hard": 1800}
-                        rating = rating_map.get(difficulty_str, 800)
+                        # Compute rating and stars using unified system
+                        rs = compute_rating_and_stars('leetcode', difficulty=difficulty_str, problem_index=idx)
+                        rating = rs['rating']
+                        stars = rs['stars']
                         
                         tags = [t["name"] for t in q_data.get("topicTags", [])]
                         if not tags:
@@ -207,6 +233,7 @@ async def sync_leetcode_data():
                                 "index": chr(ord('A') + idx), # A, B, C, D
                                 "name": f"{chr(ord('A') + idx)}. {q_summary['title']}",
                                 "rating": rating,
+                                "stars": stars,
                                 "tags": tags,
                                 "editorial_url": f"https://leetcode.com/problems/{q_slug}",
                                 "solution_cpp": sol_code,

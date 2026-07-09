@@ -4,6 +4,7 @@ from datetime import datetime
 import cloudscraper
 from bs4 import BeautifulSoup
 from app.database import get_database
+from app.services.rating_system import compute_rating_and_stars
 import re
 
 logger = logging.getLogger(__name__)
@@ -188,6 +189,9 @@ async def sync_codechef_data():
                         prob_data = r_prob.json()
                         body_html = prob_data.get("body", "")
                         difficulty = int(prob_data.get("difficulty_rating") or 1000)
+                        rs = compute_rating_and_stars('codechef', difficulty_rating=difficulty)
+                        rating = rs['rating']
+                        stars = rs['stars']
                         tags = prob_data.get("computed_tags", []) or prob_data.get("user_tags", []) or ["CodeChef"]
                         test_cases = parse_codechef_samples(body_html)
                         
@@ -211,7 +215,8 @@ int main() {
                                 "contest_id": parent_code,
                                 "index": p_code,
                                 "name": f"{p_code}. {prob_data.get('problem_name')}",
-                                "rating": difficulty,
+                                "rating": rating,
+                                "stars": stars,
                                 "tags": tags,
                                 "editorial_url": f"https://www.codechef.com/problems/{p_code}",
                                 "solution_cpp": sol_code,

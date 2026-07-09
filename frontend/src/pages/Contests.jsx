@@ -25,6 +25,23 @@ const PlatformBadge = ({ platform }) => {
 const getDiffClass  = (r) => !r || r < 1200 ? "badge-easy" : r < 1600 ? "badge-medium" : "badge-hard";
 const getDiffLabel  = (r) => !r || r < 1200 ? "Easy"       : r < 1600 ? "Medium"       : "Hard";
 
+const getStarDisplay = (stars) => {
+  if (!stars || stars <= 0) return '★';
+  const full = Math.floor(stars);
+  const half = stars % 1 >= 0.5 ? 1 : 0;
+  return '★'.repeat(full) + (half ? '½' : '');
+};
+
+const getRatingColor = (r) => {
+  if (!r || r < 1000) return '#808080';
+  if (r < 1200) return '#00C853';
+  if (r < 1400) return '#FFD600';
+  if (r < 1600) return '#FF9100';
+  if (r < 2000) return '#FF5252';
+  if (r < 2500) return '#E040FB';
+  return '#FF1744';
+};
+
 const formatDate = (secs) =>
   new Date(secs * 1000).toLocaleDateString("en-US", {
     month: "short", day: "numeric", year: "numeric",
@@ -48,7 +65,6 @@ export const Contests = () => {
     try {
       const data = await api.contests.list();
       setContests(data);
-      if (data.length > 0) handleSelectContest(data[0], false);
     } catch (e) { console.error(e); }
     finally { setLoadingContests(false); }
   };
@@ -153,7 +169,7 @@ export const Contests = () => {
                 </p>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              <div className="contests-list-wrapper">
                 {filteredContests.map((c) => {
                   const isSelected = selectedContest?.id === c.id;
                   const platform   = c.platform || "codeforces";
@@ -197,107 +213,107 @@ export const Contests = () => {
           </div>
 
           {/* Right: Problems table */}
-          <div className={`contests-problems-pane ${viewMode === "list" ? "mobile-hidden" : ""}`}>
-            {selectedContest ? (
-              <>
-                <button
-                  className="back-to-contests-btn"
-                  onClick={() => setViewMode("list")}
-                >
-                  <ChevronLeft size={14} /> Back to Contests
-                </button>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.2rem" }}>
-                      <PlatformBadge platform={selectedContest.platform || "codeforces"} />
-                      <h3 style={{ fontSize: "1.1rem" }}>{selectedContest.name}</h3>
-                    </div>
-                    <p style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
-                      {formatDate(selectedContest.start_time_seconds)} · {Math.round(selectedContest.duration_seconds / 3600)}h
-                    </p>
+          {selectedContest && (
+            <div className={`contests-problems-pane ${viewMode === "list" ? "mobile-hidden" : ""}`}>
+              <button
+                className="back-to-contests-btn"
+                onClick={() => setViewMode("list")}
+              >
+                <ChevronLeft size={14} /> Back to Contests
+              </button>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.2rem" }}>
+                    <PlatformBadge platform={selectedContest.platform || "codeforces"} />
+                    <h3 style={{ fontSize: "1.1rem" }}>{selectedContest.name}</h3>
                   </div>
+                  <p style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
+                    {formatDate(selectedContest.start_time_seconds)} · {Math.round(selectedContest.duration_seconds / 3600)}h
+                  </p>
                 </div>
+              </div>
 
-                {loadingQuestions ? (
-                  <div className="flex-center" style={{ padding: "6rem 0" }}>
-                    <RefreshCw size={28} className="animate-spin" style={{ color: "var(--color-primary)" }} />
-                  </div>
-                ) : questions.length === 0 ? (
-                  <div className="glass-card" style={{ padding: "3rem", textAlign: "center" }}>
-                    <BookOpen size={32} style={{ color: "var(--text-muted)", marginBottom: "0.75rem" }} />
-                    <p style={{ color: "var(--text-muted)" }}>No problems synced yet. Refresh shortly.</p>
-                  </div>
-                ) : (
-                  <div className="glass-card" style={{ overflow: "hidden" }}>
-                    <div className="table-container" style={{ margin: 0 }}>
-                      <table className="data-table">
-                        <thead>
-                          <tr>
-                            <th style={{ width: 40 }}></th>
-                            <th>Problem</th>
-                            <th style={{ width: 110 }}>Difficulty</th>
-                            <th style={{ width: 90 }}>Rating</th>
-                            <th style={{ width: 50, textAlign: "center" }}>★</th>
-                            <th style={{ width: 40 }}></th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {questions.map((q) => (
-                            <tr
-                              key={q.id}
-                              onClick={() => navigate(`/problem/${q.id}`)}
-                              style={{ cursor: "pointer" }}
-                            >
-                              <td>
-                                {q.is_solved
-                                  ? <CheckCircle size={16} style={{ color: "var(--color-success)" }} />
-                                  : <Circle     size={16} style={{ color: "var(--border-color)" }} />}
-                              </td>
-                              <td>
-                                <div style={{ fontWeight: 500, fontSize: "0.88rem" }}>
-                                  <span style={{ color: "var(--text-muted)", marginRight: "0.4rem" }}>{q.index}.</span>
-                                  {q.name.replace(/^[A-Z]\.\s*/, "")}
-                                </div>
-                                <div className="tag-list">
-                                  {q.tags.slice(0, 4).map((t, i) => (
-                                    <span key={i} className="problem-tag">{t}</span>
-                                  ))}
-                                </div>
-                              </td>
-                              <td>
+              {loadingQuestions ? (
+                <div className="flex-center" style={{ padding: "6rem 0" }}>
+                  <RefreshCw size={28} className="animate-spin" style={{ color: "var(--color-primary)" }} />
+                </div>
+              ) : questions.length === 0 ? (
+                <div className="glass-card" style={{ padding: "3rem", textAlign: "center" }}>
+                  <BookOpen size={32} style={{ color: "var(--text-muted)", marginBottom: "0.75rem" }} />
+                  <p style={{ color: "var(--text-muted)" }}>No problems synced yet. Refresh shortly.</p>
+                </div>
+              ) : (
+                <div className="glass-card" style={{ overflow: "hidden" }}>
+                  <div className="table-container" style={{ margin: 0 }}>
+                    <table className="data-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: 40 }}></th>
+                          <th>Problem</th>
+                          <th style={{ width: 110 }}>Difficulty</th>
+                          <th style={{ width: 90 }}>Rating</th>
+                          <th style={{ width: 50, textAlign: "center" }}>★</th>
+                          <th style={{ width: 40 }}></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {questions.map((q) => (
+                          <tr
+                            key={q.id}
+                            onClick={() => navigate(`/problem/${q.id}`)}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <td>
+                              {q.is_solved
+                                ? <CheckCircle size={16} style={{ color: "var(--color-success)" }} />
+                                : <Circle     size={16} style={{ color: "var(--border-color)" }} />}
+                            </td>
+                            <td>
+                              <div style={{ fontWeight: 500, fontSize: "0.88rem" }}>
+                                <span style={{ color: "var(--text-muted)", marginRight: "0.4rem" }}>{q.index}.</span>
+                                {q.name.replace(/^[A-Z]\.\s*/, "")}
+                              </div>
+                              <div className="tag-list">
+                                {q.tags.slice(0, 4).map((t, i) => (
+                                  <span key={i} className="problem-tag">{t}</span>
+                                ))}
+                              </div>
+                            </td>
+                            <td>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                                 <span className={`badge ${getDiffClass(q.rating)}`}>
                                   {getDiffLabel(q.rating)}
                                 </span>
-                              </td>
-                              <td>
-                                <span className="rating-tag">{q.rating}</span>
-                              </td>
-                              <td style={{ textAlign: "center" }}>
-                                <button
-                                  onClick={(e) => handleToggleFavorite(e, q.id, q.is_favorite)}
-                                  style={{ background: "none", border: "none", cursor: "pointer", color: q.is_favorite ? "var(--color-primary)" : "var(--text-muted)", padding: "0.2rem" }}
-                                >
-                                  <Star size={15} fill={q.is_favorite ? "var(--color-primary)" : "none"} />
-                                </button>
-                              </td>
-                              <td>
-                                <ChevronRight size={15} style={{ color: "var(--text-muted)" }} />
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                  <span className="rating-tag">{q.rating}</span>
+                                  {q.stars > 0 && (
+                                    <span style={{ color: getRatingColor(q.rating), fontSize: '0.7rem', letterSpacing: '-1px' }}>
+                                      {getStarDisplay(q.stars)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td style={{ textAlign: "center" }}>
+                              <button
+                                onClick={(e) => handleToggleFavorite(e, q.id, q.is_favorite)}
+                                style={{ background: "none", border: "none", cursor: "pointer", color: q.is_favorite ? "var(--color-primary)" : "var(--text-muted)", padding: "0.2rem" }}
+                              >
+                                <Star size={15} fill={q.is_favorite ? "var(--color-primary)" : "none"} />
+                              </button>
+                            </td>
+                            <td>
+                              <ChevronRight size={15} style={{ color: "var(--text-muted)" }} />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                )}
-              </>
-            ) : (
-              <div className="flex-center glass-card" style={{ padding: "5rem", flexDirection: "column", gap: "1rem", color: "var(--text-muted)" }}>
-                <BookOpen size={36} style={{ opacity: 0.3 }} />
-                <p>Select a contest from the left to view its problems.</p>
-              </div>
-            )}
-          </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

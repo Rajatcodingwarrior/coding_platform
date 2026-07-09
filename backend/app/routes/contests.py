@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from app.database import get_database
 from app.auth import get_current_user
 from app.services.codeforces import sync_codeforces_data
+from app.services.rating_system import rating_to_stars
 from app.services.leetcode import sync_leetcode_data
 from app.services.codechef import sync_codechef_data
 from app.services.atcoder import sync_atcoder_data
@@ -40,6 +41,7 @@ class QuestionSummary(BaseModel):
     index: str
     name: str
     rating: int = 800
+    stars: float = 1.0
     tags: List[str] = []
     points: Optional[float] = None
     is_solved: bool = False
@@ -56,6 +58,7 @@ class QuestionDetailResponse(BaseModel):
     index: str
     name: str
     rating: int = 800
+    stars: float = 1.0
     tags: List[str] = []
     points: Optional[float] = None
     editorial_url: str = ""
@@ -174,6 +177,8 @@ async def get_contest_questions(contest_id: str, current_user: dict = Depends(ge
         q["id"] = q["_id"]
         # Normalise missing fields so Pydantic doesn't reject them
         q.setdefault("rating", 800)
+        if "stars" not in q or not q["stars"] or q["stars"] <= 0:
+            q["stars"] = round(rating_to_stars(q["rating"]) * 2) / 2
         q.setdefault("tags", [])
         q.setdefault("platform", "codeforces")
         q.setdefault("index", "?")
@@ -206,6 +211,8 @@ async def get_question_details(question_id: str, current_user: dict = Depends(ge
 
     q["id"] = q["_id"]
     q.setdefault("rating", 800)
+    if "stars" not in q or not q["stars"] or q["stars"] <= 0:
+        q["stars"] = round(rating_to_stars(q["rating"]) * 2) / 2
     q.setdefault("tags", [])
     q.setdefault("platform", "codeforces")
     q.setdefault("index", "?")

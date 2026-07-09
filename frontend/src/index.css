@@ -533,6 +533,12 @@ input:focus, textarea:focus {
   margin-bottom: 1rem;
 }
 
+.contests-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
 /* Responsive grid layouts */
 @media (max-width: 991px) {
   .dashboard-grid {
@@ -541,7 +547,6 @@ input:focus, textarea:focus {
   }
 
   .contests-grid {
-    grid-template-columns: 1fr;
     gap: 1.5rem;
   }
   
@@ -814,6 +819,14 @@ input:focus, textarea:focus {
   opacity: 0.8;
 }
 
+/* Contests list cards grid layout */
+.contests-list-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.8rem;
+  width: 100%;
+}
+
 @media (max-width: 991px) {
   .back-to-contests-btn {
     display: inline-flex;
@@ -822,4 +835,9 @@ input:focus, textarea:focus {
   .mobile-hidden {
     display: none !important;
   }
+  
+  .contests-list-wrapper {
+    grid-template-columns: 1fr;
+  }
 }
+

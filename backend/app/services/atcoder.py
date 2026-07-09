@@ -5,6 +5,7 @@ from datetime import datetime
 import cloudscraper
 from bs4 import BeautifulSoup
 from app.database import get_database
+from app.services.rating_system import compute_rating_and_stars
 import re
 
 # Fix Windows console encoding for Japanese/Unicode contest names
@@ -13,6 +14,43 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 logger = logging.getLogger(__name__)
 scraper = cloudscraper.create_scraper()
+
+def get_atcoder_solution_github(contest_id: str, problem_label: str) -> str:
+    """
+    Attempts to fetch C++ solution for AtCoder from Yuulis/AtcoderSolution on GitHub.
+    """
+    fallback_template = """#include <iostream>
+using namespace std;
+
+int main() {
+    // Write your AtCoder C++ code here
+    return 0;
+}
+"""
+    cid = contest_id.lower().strip()
+    label = problem_label.lower().strip()
+    
+    contest_type = ""
+    if cid.startswith("abc"):
+        contest_type = "ABC"
+    elif cid.startswith("arc"):
+        contest_type = "ARC"
+    elif cid.startswith("agc"):
+        contest_type = "AGC"
+    else:
+        return fallback_template
+        
+    url = f"https://raw.githubusercontent.com/Yuulis/AtcoderSolution/main/{contest_type}/{cid}/{label}/main.cpp"
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+        r = scraper.get(url, headers=headers, timeout=8)
+        if r.status_code == 200:
+            logger.info(f"Successfully fetched AtCoder solution for {cid} {label} from GitHub")
+            return r.text
+    except Exception as e:
+        logger.error(f"Error fetching AtCoder solution for {cid} {label}: {e}")
+        
+    return fallback_template
 
 def parse_atcoder_problem_sync(contest_id: str, problem_id: str) -> dict:
     """
@@ -161,22 +199,13 @@ async def sync_atcoder_data():
                     test_cases = existing_q["test_cases"]
                     description_html = existing_q["description_html"]
                 
-                # Heuristic rating estimation based on problem index label
-                # A=800, B=1000, C=1200, D=1400, E=1600, F=1800, G=2000, H=2200
-                rating = 800
-                if label:
-                    char_val = ord(label[0].upper()) - ord('A')
-                    rating = min(3000, max(800, 800 + char_val * 200))
+                # Compute rating and stars using unified system
+                rs = compute_rating_and_stars('atcoder', problem_label=label)
+                rating = rs['rating']
+                stars = rs['stars']
                 
-                # Default C++ template since submissions require login
-                sol_code = """#include <iostream>
-using namespace std;
-
-int main() {
-    // Write your AtCoder C++ code here
-    return 0;
-}
-"""
+                # Fetch solution dynamically from GitHub
+                sol_code = get_atcoder_solution_github(contest_id, label)
                 
                 await db.questions.update_one(
                     {"_id": q_id},
@@ -185,6 +214,7 @@ int main() {
                         "index": label,
                         "name": f"{label}. {prob_id.replace('_', ' ').title()}",
                         "rating": rating,
+                        "stars": stars,
                         "tags": ["AtCoder", contest_id[:3].upper()],
                         "editorial_url": f"https://atcoder.jp/contests/{contest_id}/tasks/{prob_id}",
                         "solution_cpp": sol_code,

@@ -4,7 +4,7 @@ import { api } from "../services/api";
 import {
   Play, Send, CheckCircle, XCircle, RefreshCw, Star,
   BookOpen, ExternalLink, Code, Terminal, Check, X,
-  Timer, Pause, RotateCcw, Copy, ChevronLeft
+  Timer, Pause, RotateCcw, Copy, ChevronLeft, Search, GitFork
 } from "lucide-react";
 
 // ── Platform badge helper ──────────────────────────────────────
@@ -17,6 +17,23 @@ const PlatformBadge = ({ platform }) => {
   };
   const c = cfg[platform] || cfg.codeforces;
   return <span className={`platform-badge ${c.cls}`}>{c.label}</span>;
+};
+
+const getStarDisplay = (stars) => {
+  if (!stars || stars <= 0) return '★';
+  const full = Math.floor(stars);
+  const half = stars % 1 >= 0.5 ? 1 : 0;
+  return '★'.repeat(full) + (half ? '½' : '');
+};
+
+const getRatingColor = (r) => {
+  if (!r || r < 1000) return '#808080';
+  if (r < 1200) return '#00C853';
+  if (r < 1400) return '#FFD600';
+  if (r < 1600) return '#FF9100';
+  if (r < 2000) return '#FF5252';
+  if (r < 2500) return '#E040FB';
+  return '#FF1744';
 };
 
 // ── Stopwatch ──────────────────────────────────────────────────
@@ -290,6 +307,11 @@ export const ProblemDetails = () => {
                     <span className="rating-tag" style={{ borderColor: `${accentColor}55`, color: accentColor }}>
                       ★ {question.rating}
                     </span>
+                    {question.stars > 0 && (
+                      <span className="rating-tag" style={{ borderColor: `${getRatingColor(question.rating)}44`, color: getRatingColor(question.rating), fontSize: '0.75rem', letterSpacing: '-0.5px' }}>
+                        {getStarDisplay(question.stars)}
+                      </span>
+                    )}
                     {question.editorial_url && (
                       <a
                         href={question.editorial_url}
@@ -408,6 +430,46 @@ export const ProblemDetails = () => {
               }}>
                 {question.solution_cpp || "// No solution scraped for this problem yet."}
               </pre>
+
+              {(!question.solution_cpp || 
+                question.solution_cpp.includes("Write your AtCoder") || 
+                question.solution_cpp.includes("Write your CodeChef") || 
+                question.solution_cpp.includes("Write your solution here")) && (
+                <div style={{
+                  display: "flex", flexWrap: "wrap", gap: "1rem", marginTop: "1rem",
+                  padding: "1rem", borderRadius: "var(--radius-sm)",
+                  backgroundColor: "rgba(91,139,255,0.05)", border: "1px solid #2e2e2e"
+                }}>
+                  <div style={{ flex: 1, minWidth: "200px" }}>
+                    <h4 style={{ fontSize: "0.9rem", color: "var(--text-bright)", marginBottom: "0.25rem" }}>
+                      Solution Code Unavailable
+                    </h4>
+                    <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: "1.4" }}>
+                      AtCoder & CodeChef restrict access to submission code. You can quickly search for public solutions uploaded by other competitive programmers.
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                    <a
+                      href={`https://www.google.com/search?q=${encodeURIComponent(`${question.platform === "atcoder" ? "AtCoder" : question.platform === "codechef" ? "CodeChef" : question.platform} ${question.index ? question.name : question.title || ""} C++ solution`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-secondary"
+                      style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", padding: "0.4rem 0.8rem", fontSize: "0.8rem", color: "var(--text-bright)", borderColor: "var(--border-color)", textDecoration: "none" }}
+                    >
+                      <Search size={14} /> Google
+                    </a>
+                    <a
+                      href={`https://github.com/search?q=${encodeURIComponent(`${question.platform === "atcoder" ? "AtCoder" : question.platform === "codechef" ? "CodeChef" : question.platform} ${question.index ? question.name : question.title || ""} cpp`)}&type=code`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-secondary"
+                      style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", padding: "0.4rem 0.8rem", fontSize: "0.8rem", color: "var(--text-bright)", borderColor: "var(--border-color)", textDecoration: "none" }}
+                    >
+                      <GitFork size={14} /> GitHub
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
