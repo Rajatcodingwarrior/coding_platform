@@ -232,7 +232,7 @@ export const ProblemDetails = () => {
         </button>
       </div>
 
-      <div className="ide-wrapper animate-fade" style={{ flex: 1, height: "100%" }}>
+      <div className="ide-wrapper animate-fade" style={{ flex: 1, minHeight: 0 }}>
 
         {/* ═══════════════════ LEFT PANE ═══════════════════ */}
         <div className={`pane-left ${activePane === "left" ? "mobile-active" : ""}`}>
@@ -259,9 +259,9 @@ export const ProblemDetails = () => {
           {leftTab === "description" ? (
             <div>
               {/* ── Problem title & meta ── */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+              <div className="problem-title-header">
                 <div style={{ flex: 1, marginRight: "1rem" }}>
-                  <h2 style={{ fontSize: "1.25rem", lineHeight: "1.4", marginBottom: "0.5rem" }}>
+                  <h2 className="problem-title">
                     {question.name}
                   </h2>
                   <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>

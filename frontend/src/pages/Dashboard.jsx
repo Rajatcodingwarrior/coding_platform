@@ -65,7 +65,7 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="container" style={{ padding: "2.5rem 1rem", minHeight: "calc(100vh - 55px)" }}>
+    <div className="container dashboard-container" style={{ minHeight: "calc(100vh - 55px)" }}>
       {/* Welcome banner */}
       <div className="glass-card animate-fade" style={{ 
         padding: "2rem", 

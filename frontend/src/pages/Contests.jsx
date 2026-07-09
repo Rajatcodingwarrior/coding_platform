@@ -82,7 +82,7 @@ export const Contests = () => {
 
   return (
     <div style={{ minHeight: "calc(100vh - 55px)", background: "var(--bg-deep)" }}>
-      <div className="container" style={{ paddingTop: "2rem", paddingBottom: "3rem" }}>
+      <div className="container contests-container">
 
         {/* ── Page header ── */}
         <div style={{ marginBottom: "1.75rem" }}>

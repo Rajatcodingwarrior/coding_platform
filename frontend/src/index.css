@@ -681,3 +681,57 @@ input:focus, textarea:focus {
   }
 }
 
+/* Page containers padding & min-height */
+.dashboard-container {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+.contests-container {
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+  min-height: calc(100vh - 55px);
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+  
+  .contests-container {
+    padding-top: 1.25rem;
+    padding-bottom: 2rem;
+  }
+  
+  .glass-card {
+    padding: 1.25rem !important; /* Make card padding more compact on mobile */
+  }
+}
+
+/* Problem title block responsiveness */
+.problem-title-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+.problem-title {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+
+@media (max-width: 576px) {
+  .problem-title-header {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .problem-title {
+    font-size: 1.12rem;
+  }
+}
+
+
