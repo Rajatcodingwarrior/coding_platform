@@ -108,8 +108,26 @@ export const ProblemDetails = () => {
 
   // ── MathJax typeset on description tab ──────────────────────
   useEffect(() => {
-    if (question && leftTab === "description" && window.MathJax?.typesetPromise) {
-      setTimeout(() => window.MathJax.typesetPromise(), 120);
+    if (question && leftTab === "description") {
+      // 1. Process <var> elements (common in AtCoder statements)
+      const container = document.querySelector(".pane-content");
+      if (container) {
+        const varTags = container.getElementsByTagName("var");
+        for (let i = 0; i < varTags.length; i++) {
+          const tag = varTags[i];
+          let html = tag.innerHTML.trim();
+          if (html && !html.startsWith("\\(") && !html.startsWith("$$")) {
+            // Replace subscript HTML tags with LaTeX equivalents
+            html = html.replace(/<sub>/g, "_{").replace(/<\/sub>/g, "}");
+            tag.innerHTML = `\\(${html}\\)`;
+          }
+        }
+      }
+
+      // 2. Trigger MathJax typeset rendering
+      if (window.MathJax?.typesetPromise) {
+        setTimeout(() => window.MathJax.typesetPromise(), 120);
+      }
     }
   }, [question, leftTab]);
 
