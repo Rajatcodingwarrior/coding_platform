@@ -756,5 +756,26 @@ input:focus, textarea:focus {
   }
 }
 
+/* Responsive pane header text collapse for mobile devices */
+@media (max-width: 480px) {
+  .pane-header .tab-label,
+  .pane-header .btn-label {
+    display: none !important;
+  }
+  .pane-header {
+    padding: 0 0.5rem !important;
+    gap: 0.5rem !important;
+  }
+  .pane-tab {
+    padding: 0 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+  .stopwatch-widget {
+    padding: 0.2rem 0.4rem !important;
+    gap: 0.3rem !important;
+  }
+}
+
+
 
 

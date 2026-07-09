@@ -246,10 +246,10 @@ export const ProblemDetails = () => {
             <ChevronLeft size={16} />
           </button>
           <div onClick={() => setLeftTab("description")} className={`pane-tab ${leftTab === "description" ? "active" : ""}`}>
-            <BookOpen size={13} /> Description
+            <BookOpen size={13} /> <span className="tab-label">Description</span>
           </div>
           <div onClick={() => setLeftTab("solution")} className={`pane-tab ${leftTab === "solution" ? "active" : ""}`}>
-            <Code size={13} /> Solution
+            <Code size={13} /> <span className="tab-label">Solution</span>
           </div>
           {/* Stopwatch on the far right of left pane header */}
           <StopwatchWidget />
@@ -400,10 +400,10 @@ export const ProblemDetails = () => {
         <div className="pane-header" style={{ justifyContent: "space-between" }}>
           <div style={{ display: "flex", gap: "1.5rem" }}>
             <div onClick={() => setRightTab("editor")} className={`pane-tab ${rightTab === "editor" ? "active" : ""}`}>
-              <Code size={13} /> C++ Editor
+              <Code size={13} /> <span className="tab-label">C++ Editor</span>
             </div>
             <div onClick={() => setRightTab("console")} className={`pane-tab ${rightTab === "console" ? "active" : ""}`}>
-              <Terminal size={13} /> Console
+              <Terminal size={13} /> <span className="tab-label">Console</span>
             </div>
           </div>
           {/* Mark solved button */}
@@ -418,7 +418,7 @@ export const ProblemDetails = () => {
             }}
           >
             {isSolved ? <CheckCircle size={12} /> : <div style={{ width: 12, height: 12, borderRadius: "50%", border: "1.5px solid currentColor" }} />}
-            {isSolved ? "Solved" : "Mark Solved"}
+            <span className="btn-label">{isSolved ? "Solved" : "Mark Solved"}</span>
           </button>
         </div>
 
