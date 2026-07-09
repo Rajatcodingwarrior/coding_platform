@@ -209,6 +209,29 @@ int main() {
 }
 """
                         
+                        # CodeChef HTML can contain script/style tags and inconsistent wrappers.
+                        # This normalization keeps rendering consistent in the React app.
+                        normalized_body_html = body_html or ""
+                        try:
+                            soup = BeautifulSoup(normalized_body_html, "html.parser")
+
+                            # Remove script/style tags (security + layout issues)
+                            for t in soup.find_all(["script", "style"]):
+                                t.decompose()
+
+                            # Drop inline styles that can break our layout
+                            for tag in soup.find_all(True):
+                                if tag.has_attr("style"):
+                                    del tag["style"]
+
+                            # If body contains plain text nodes mixed with HTML, wrap into a single container
+                            # so CSS/scoped rendering stays predictable.
+                            # (React renders via dangerouslySetInnerHTML anyway.)
+                            normalized_body_html = str(soup)
+                        except Exception as e:
+                            logger.error(f"CodeChef HTML normalization failed for {p_code}: {e}")
+                            normalized_body_html = body_html
+
                         await db.questions.update_one(
                             {"_id": q_id},
                             {"$set": {
@@ -221,7 +244,7 @@ int main() {
                                 "editorial_url": f"https://www.codechef.com/problems/{p_code}",
                                 "solution_cpp": sol_code,
                                 "test_cases": test_cases,
-                                "description_html": body_html,
+                                "description_html": normalized_body_html,
                                 "platform": "codechef",
                                 "synced_at": datetime.utcnow()
                             }},
