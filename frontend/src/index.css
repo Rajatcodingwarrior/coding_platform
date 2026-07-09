@@ -720,13 +720,33 @@ input:focus, textarea:focus {
   }
 }
 
-/* Auth page container styles */
+/* Auth page container and card styles */
 .auth-page-container {
   padding: 2rem;
+  width: 100%;
 }
 @media (max-width: 576px) {
   .auth-page-container {
     padding: 1rem;
+  }
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+}
+
+.auth-card-signup {
+  width: 100%;
+  max-width: 440px;
+  padding: 2.5rem;
+}
+
+@media (max-width: 576px) {
+  .auth-card,
+  .auth-card-signup {
+    padding: 1.5rem;
   }
 }
 
