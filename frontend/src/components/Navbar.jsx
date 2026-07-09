@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
-import { Terminal, LogOut, RefreshCw, BarChart2, BookOpen } from "lucide-react";
+import { Terminal, LogOut, RefreshCw, BarChart2, BookOpen, Menu, X } from "lucide-react";
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [syncing, setSyncing] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -27,13 +28,23 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="navbar-header">
+    <header className="navbar-header" style={{ position: "relative" }}>
       <div className="container navbar-container">
-        <Link to="/" className="nav-logo">
+        <Link to="/" className="nav-logo" onClick={() => setMobileMenuOpen(false)}>
           <Terminal className="nav-logo-icon" size={24} />
           <span>CF<span style={{ color: "var(--color-primary)" }}>CodeSpace</span></span>
         </Link>
 
+        {/* Mobile menu toggle */}
+        <button 
+          className="mobile-nav-toggle" 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle navigation menu"
+        >
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        {/* Desktop Navigation Links */}
         {user ? (
           <nav className="nav-links">
             <NavLink to="/" end className={({ isActive }) => `nav-link flex-center ${isActive ? 'active' : ''}`} style={{ gap: '0.4rem' }}>
@@ -73,6 +84,61 @@ export const Navbar = () => {
           </nav>
         )}
       </div>
+
+      {/* Mobile Navigation Dropdown Menu */}
+      {mobileMenuOpen && (
+        <div className="mobile-nav-menu">
+          {user ? (
+            <>
+              <NavLink 
+                to="/" 
+                end 
+                className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`} 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <BarChart2 size={16} /> Dashboard
+              </NavLink>
+              <NavLink 
+                to="/contests" 
+                className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`} 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <BookOpen size={16} /> Contests
+              </NavLink>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "0.5rem" }}>
+                <span style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
+                  Hi, <span style={{ color: "var(--text-main)", fontWeight: "600" }}>{user.username}</span>
+                </span>
+                
+                <button 
+                  onClick={() => { handleSync(); setMobileMenuOpen(false); }} 
+                  disabled={syncing}
+                  className="btn btn-secondary flex-center"
+                  style={{ width: "100%", padding: "0.6rem 1rem", fontSize: "0.85rem", gap: "0.4rem" }}
+                >
+                  <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
+                  {syncing ? "Syncing..." : "Sync CF"}
+                </button>
+
+                <button 
+                  onClick={() => { handleLogout(); setMobileMenuOpen(false); }} 
+                  className="btn btn-secondary flex-center"
+                  style={{ width: "100%", padding: "0.6rem 1rem", fontSize: "0.85rem", gap: "0.4rem", color: "#f87171" }}
+                >
+                  <LogOut size={14} />
+                  Logout
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              <Link to="/signup" className="btn btn-primary" style={{ width: "100%", padding: "0.6rem 1rem", fontSize: "0.85rem" }} onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
+            </>
+          )}
+        </div>
+      )}
       
       {/* Spinning loading keyframe style injected locally for spin animation */}
       <style>{`
@@ -87,3 +153,4 @@ export const Navbar = () => {
     </header>
   );
 };
+

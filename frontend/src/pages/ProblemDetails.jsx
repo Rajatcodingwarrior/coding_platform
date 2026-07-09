@@ -102,6 +102,7 @@ export const ProblemDetails = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isSolved,   setIsSolved]   = useState(false);
   const [copied,     setCopied]     = useState(false);
+  const [activePane, setActivePane] = useState("left"); // "left" or "right"
 
   const textareaRef = useRef(null);
 
@@ -214,10 +215,27 @@ export const ProblemDetails = () => {
   const accentColor = platformColor[question.platform] || "var(--color-primary)";
 
   return (
-    <div className="ide-wrapper animate-fade">
+    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 55px)", width: "100%" }}>
+      {/* Mobile pane switcher */}
+      <div className="mobile-pane-tabs">
+        <button 
+          className={`mobile-pane-tab ${activePane === "left" ? "active" : ""}`}
+          onClick={() => setActivePane("left")}
+        >
+          <BookOpen size={14} /> Problem & Solution
+        </button>
+        <button 
+          className={`mobile-pane-tab ${activePane === "right" ? "active" : ""}`}
+          onClick={() => setActivePane("right")}
+        >
+          <Code size={14} /> Editor & Console
+        </button>
+      </div>
 
-      {/* ═══════════════════ LEFT PANE ═══════════════════ */}
-      <div className="pane-left">
+      <div className="ide-wrapper animate-fade" style={{ flex: 1, height: "100%" }}>
+
+        {/* ═══════════════════ LEFT PANE ═══════════════════ */}
+        <div className={`pane-left ${activePane === "left" ? "mobile-active" : ""}`}>
         {/* Tabs */}
         <div className="pane-header" style={{ gap: "1rem" }}>
           <button
@@ -378,7 +396,7 @@ export const ProblemDetails = () => {
       </div>
 
       {/* ═══════════════════ RIGHT PANE ═══════════════════ */}
-      <div className="pane-right">
+      <div className={`pane-right ${activePane === "right" ? "mobile-active" : ""}`}>
         <div className="pane-header" style={{ justifyContent: "space-between" }}>
           <div style={{ display: "flex", gap: "1.5rem" }}>
             <div onClick={() => setRightTab("editor")} className={`pane-tab ${rightTab === "editor" ? "active" : ""}`}>
@@ -628,5 +646,6 @@ export const ProblemDetails = () => {
         )}
       </div>
     </div>
+  </div>
   );
 };

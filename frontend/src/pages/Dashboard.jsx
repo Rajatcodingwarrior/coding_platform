@@ -177,54 +177,56 @@ export const Dashboard = () => {
             </div>
           ) : (
             <div className="glass-card" style={{ overflow: "hidden" }}>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Problem</th>
-                    <th>Rating</th>
-                    <th>Status</th>
-                    <th style={{ width: "60px", textAlign: "center" }}>Remove</th>
-                    <th style={{ width: "40px" }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.favorites.map((q) => (
-                    <tr 
-                      key={q.id}
-                      onClick={() => navigate(`/problem/${q.id}`)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <td style={{ fontWeight: "500" }}>
-                        {q.contest_id}{q.index}. {q.name}
-                        <div className="tag-list">
-                          {q.tags.slice(0, 2).map((t, idx) => (
-                            <span key={idx} className="problem-tag">{t}</span>
-                          ))}
-                        </div>
-                      </td>
-                      <td>
-                        <span className="rating-tag">{q.rating}</span>
-                      </td>
-                      <td>
-                        <span className={`badge ${q.is_solved ? 'badge-easy' : 'badge-medium'}`}>
-                          {q.is_solved ? "Solved" : "Unsolved"}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: "center" }}>
-                        <button 
-                          onClick={(e) => handleRemoveFavorite(e, q.id)}
-                          style={{ background: "none", border: "none", cursor: "pointer", color: "#f87171" }}
-                        >
-                          <Star size={16} fill="var(--color-primary)" style={{ color: "var(--color-primary)" }} />
-                        </button>
-                      </td>
-                      <td>
-                        <ArrowRight size={14} style={{ color: "var(--text-muted)" }} />
-                      </td>
+              <div className="table-container" style={{ margin: 0 }}>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Problem</th>
+                      <th>Rating</th>
+                      <th>Status</th>
+                      <th style={{ width: "60px", textAlign: "center" }}>Remove</th>
+                      <th style={{ width: "40px" }}></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {stats.favorites.map((q) => (
+                      <tr 
+                        key={q.id}
+                        onClick={() => navigate(`/problem/${q.id}`)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <td style={{ fontWeight: "500" }}>
+                          {q.contest_id}{q.index}. {q.name}
+                          <div className="tag-list">
+                            {q.tags.slice(0, 2).map((t, idx) => (
+                              <span key={idx} className="problem-tag">{t}</span>
+                            ))}
+                          </div>
+                        </td>
+                        <td>
+                          <span className="rating-tag">{q.rating}</span>
+                        </td>
+                        <td>
+                          <span className={`badge ${q.is_solved ? 'badge-easy' : 'badge-medium'}`}>
+                            {q.is_solved ? "Solved" : "Unsolved"}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: "center" }}>
+                          <button 
+                            onClick={(e) => handleRemoveFavorite(e, q.id)}
+                            style={{ background: "none", border: "none", cursor: "pointer", color: "#f87171" }}
+                          >
+                            <Star size={16} fill="var(--color-primary)" style={{ color: "var(--color-primary)" }} />
+                          </button>
+                        </td>
+                        <td>
+                          <ArrowRight size={14} style={{ color: "var(--text-muted)" }} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

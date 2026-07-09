@@ -518,3 +518,166 @@ input:focus, textarea:focus {
   border: none;
   padding: 0;
 }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE LAYOUT STYLES & MEDIA QUERIES
+   ═══════════════════════════════════════ */
+
+/* Responsive tables */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
+/* Responsive grid layouts */
+@media (max-width: 991px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .contests-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .sample-case-body {
+    grid-template-columns: 1fr;
+  }
+  
+  .sample-case-col:first-child {
+    border-right: none;
+    border-bottom: 1px solid #2e2e2e;
+  }
+}
+
+/* Responsive container padding */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1.25rem;
+  }
+}
+
+/* Navbar mobile styles */
+.mobile-nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-main);
+  padding: 0.25rem;
+  transition: color var(--transition-fast);
+}
+
+.mobile-nav-toggle:hover {
+  color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+  .navbar-header .nav-links {
+    display: none;
+  }
+
+  .mobile-nav-toggle {
+    display: block;
+  }
+
+  .mobile-nav-menu {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-main);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+    gap: 1rem;
+    position: absolute;
+    top: 55px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    box-shadow: var(--shadow-md);
+    animation: fadeIn var(--transition-fast);
+  }
+
+  .mobile-nav-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: color var(--transition-fast);
+  }
+
+  .mobile-nav-link:hover, .mobile-nav-link.active {
+    color: var(--text-main);
+  }
+}
+
+/* IDE Mobile layout & tabs */
+.mobile-pane-tabs {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .ide-wrapper {
+    grid-template-columns: 1fr;
+    height: calc(100vh - 55px - 40px); /* adjust height for switcher bar */
+  }
+
+  .pane-left, .pane-right {
+    display: none;
+  }
+
+  .pane-left.mobile-active, .pane-right.mobile-active {
+    display: flex;
+  }
+
+  .mobile-pane-tabs {
+    display: flex;
+    height: 40px;
+    background-color: var(--bg-main);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+  }
+
+  .mobile-pane-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-bottom: 2px solid transparent;
+    transition: all var(--transition-fast);
+    font-family: var(--font-sans);
+  }
+
+  .mobile-pane-tab:hover {
+    color: var(--text-main);
+  }
+
+  .mobile-pane-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+    background-color: rgba(255, 255, 255, 0.02);
+    font-weight: 600;
+  }
+}
+
+/* Hide difficulty or redundant columns on extra small mobile screens */
+@media (max-width: 576px) {
+  .data-table th:nth-child(3), .data-table td:nth-child(3), /* Difficulty */
+  .data-table th:nth-child(6), .data-table td:nth-child(6)  /* Arrow icon */ {
+    display: none;
+  }
+}
+

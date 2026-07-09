@@ -126,7 +126,7 @@ export const Contests = () => {
         </div>
 
         {/* ── Main two-column layout ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: "1.5rem", alignItems: "start" }}>
+        <div className="contests-grid">
 
           {/* Left: Contest list */}
           <div>
@@ -219,63 +219,65 @@ export const Contests = () => {
                   </div>
                 ) : (
                   <div className="glass-card" style={{ overflow: "hidden" }}>
-                    <table className="data-table">
-                      <thead>
-                        <tr>
-                          <th style={{ width: 40 }}></th>
-                          <th>Problem</th>
-                          <th style={{ width: 110 }}>Difficulty</th>
-                          <th style={{ width: 90 }}>Rating</th>
-                          <th style={{ width: 50, textAlign: "center" }}>★</th>
-                          <th style={{ width: 40 }}></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {questions.map((q) => (
-                          <tr
-                            key={q.id}
-                            onClick={() => navigate(`/problem/${q.id}`)}
-                            style={{ cursor: "pointer" }}
-                          >
-                            <td>
-                              {q.is_solved
-                                ? <CheckCircle size={16} style={{ color: "var(--color-success)" }} />
-                                : <Circle     size={16} style={{ color: "var(--border-color)" }} />}
-                            </td>
-                            <td>
-                              <div style={{ fontWeight: 500, fontSize: "0.88rem" }}>
-                                <span style={{ color: "var(--text-muted)", marginRight: "0.4rem" }}>{q.index}.</span>
-                                {q.name.replace(/^[A-Z]\.\s*/, "")}
-                              </div>
-                              <div className="tag-list">
-                                {q.tags.slice(0, 4).map((t, i) => (
-                                  <span key={i} className="problem-tag">{t}</span>
-                                ))}
-                              </div>
-                            </td>
-                            <td>
-                              <span className={`badge ${getDiffClass(q.rating)}`}>
-                                {getDiffLabel(q.rating)}
-                              </span>
-                            </td>
-                            <td>
-                              <span className="rating-tag">{q.rating}</span>
-                            </td>
-                            <td style={{ textAlign: "center" }}>
-                              <button
-                                onClick={(e) => handleToggleFavorite(e, q.id, q.is_favorite)}
-                                style={{ background: "none", border: "none", cursor: "pointer", color: q.is_favorite ? "var(--color-primary)" : "var(--text-muted)", padding: "0.2rem" }}
-                              >
-                                <Star size={15} fill={q.is_favorite ? "var(--color-primary)" : "none"} />
-                              </button>
-                            </td>
-                            <td>
-                              <ChevronRight size={15} style={{ color: "var(--text-muted)" }} />
-                            </td>
+                    <div className="table-container" style={{ margin: 0 }}>
+                      <table className="data-table">
+                        <thead>
+                          <tr>
+                            <th style={{ width: 40 }}></th>
+                            <th>Problem</th>
+                            <th style={{ width: 110 }}>Difficulty</th>
+                            <th style={{ width: 90 }}>Rating</th>
+                            <th style={{ width: 50, textAlign: "center" }}>★</th>
+                            <th style={{ width: 40 }}></th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {questions.map((q) => (
+                            <tr
+                              key={q.id}
+                              onClick={() => navigate(`/problem/${q.id}`)}
+                              style={{ cursor: "pointer" }}
+                            >
+                              <td>
+                                {q.is_solved
+                                  ? <CheckCircle size={16} style={{ color: "var(--color-success)" }} />
+                                  : <Circle     size={16} style={{ color: "var(--border-color)" }} />}
+                              </td>
+                              <td>
+                                <div style={{ fontWeight: 500, fontSize: "0.88rem" }}>
+                                  <span style={{ color: "var(--text-muted)", marginRight: "0.4rem" }}>{q.index}.</span>
+                                  {q.name.replace(/^[A-Z]\.\s*/, "")}
+                                </div>
+                                <div className="tag-list">
+                                  {q.tags.slice(0, 4).map((t, i) => (
+                                    <span key={i} className="problem-tag">{t}</span>
+                                  ))}
+                                </div>
+                              </td>
+                              <td>
+                                <span className={`badge ${getDiffClass(q.rating)}`}>
+                                  {getDiffLabel(q.rating)}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="rating-tag">{q.rating}</span>
+                              </td>
+                              <td style={{ textAlign: "center" }}>
+                                <button
+                                  onClick={(e) => handleToggleFavorite(e, q.id, q.is_favorite)}
+                                  style={{ background: "none", border: "none", cursor: "pointer", color: q.is_favorite ? "var(--color-primary)" : "var(--text-muted)", padding: "0.2rem" }}
+                                >
+                                  <Star size={15} fill={q.is_favorite ? "var(--color-primary)" : "none"} />
+                                </button>
+                              </td>
+                              <td>
+                                <ChevronRight size={15} style={{ color: "var(--text-muted)" }} />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 )}
               </>
