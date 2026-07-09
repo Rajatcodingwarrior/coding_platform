@@ -774,8 +774,32 @@ input:focus, textarea:focus {
     padding: 0.2rem 0.4rem !important;
     gap: 0.3rem !important;
   }
+}/* Mobile master-detail view classes */
+.back-to-contests-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0 0.75rem 0;
+  font-family: var(--font-sans);
+  transition: opacity var(--transition-fast);
 }
 
+.back-to-contests-btn:hover {
+  opacity: 0.8;
+}
 
-
-
+@media (max-width: 991px) {
+  .back-to-contests-btn {
+    display: inline-flex;
+  }
+  
+  .mobile-hidden {
+    display: none !important;
+  }
+}

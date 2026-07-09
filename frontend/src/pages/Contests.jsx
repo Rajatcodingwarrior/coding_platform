@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import { BookOpen, CheckCircle, Circle, Star, Calendar, Clock, ChevronRight, RefreshCw, Zap } from "lucide-react";
+import { BookOpen, CheckCircle, Circle, Star, Calendar, Clock, ChevronRight, ChevronLeft, RefreshCw, Zap } from "lucide-react";
 
 const PLATFORM_CFG = {
   all:         { label: "All",        pill: "active",    dot: "#9ba3af" },
@@ -38,6 +38,7 @@ export const Contests = () => {
   const [loadingContests,  setLoadingContests]  = useState(true);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [platformFilter, setPlatformFilter]   = useState("all");
+  const [viewMode, setViewMode]               = useState("list"); // "list" or "problems" on mobile
   const navigate = useNavigate();
 
   useEffect(() => { fetchContests(); }, []);
@@ -47,14 +48,17 @@ export const Contests = () => {
     try {
       const data = await api.contests.list();
       setContests(data);
-      if (data.length > 0) handleSelectContest(data[0]);
+      if (data.length > 0) handleSelectContest(data[0], false);
     } catch (e) { console.error(e); }
     finally { setLoadingContests(false); }
   };
 
-  const handleSelectContest = async (contest) => {
+  const handleSelectContest = async (contest, shouldSwitchView = true) => {
     setSelectedContest(contest);
     setLoadingQuestions(true);
+    if (shouldSwitchView) {
+      setViewMode("problems");
+    }
     try {
       const qData = await api.contests.getQuestions(contest.id);
       setQuestions(qData);
@@ -129,7 +133,7 @@ export const Contests = () => {
         <div className="contests-grid">
 
           {/* Left: Contest list */}
-          <div>
+          <div className={`contests-list-pane ${viewMode === "problems" ? "mobile-hidden" : ""}`}>
             <div style={{
               fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase",
               letterSpacing: "0.08em", color: "var(--text-muted)", marginBottom: "0.75rem"
@@ -193,9 +197,15 @@ export const Contests = () => {
           </div>
 
           {/* Right: Problems table */}
-          <div>
+          <div className={`contests-problems-pane ${viewMode === "list" ? "mobile-hidden" : ""}`}>
             {selectedContest ? (
               <>
+                <button
+                  className="back-to-contests-btn"
+                  onClick={() => setViewMode("list")}
+                >
+                  <ChevronLeft size={14} /> Back to Contests
+                </button>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.2rem" }}>
