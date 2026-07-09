@@ -39,8 +39,8 @@ export const Signup = () => {
   };
 
   return (
-    <div className="flex-center" style={{ minHeight: "calc(100vh - 55px)", padding: "2rem" }}>
-      <div className="glass-card animate-pop" style={{ width: "100%", maxWidth: "440px", padding: "2.5rem" }}>
+    <div className="flex-center auth-page-container" style={{ minHeight: "calc(100vh - 55px)", minHeight: "calc(100dvh - 55px)" }}>
+      <div className="glass-card animate-pop" style={{ width: "100%", maxWidth: "440px" }}>
         <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
           <div className="flex-center" style={{ 
             width: "50px", 
