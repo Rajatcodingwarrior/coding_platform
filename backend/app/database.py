@@ -3,10 +3,17 @@ import motor.motor_asyncio
 import certifi
 from app.config import settings
 
-# ─── Force Google DNS (8.8.8.8) to bypass ISP/corporate DNS that blocks Atlas SRV ───
-_google_resolver = dns.resolver.Resolver(configure=False)
-_google_resolver.nameservers = ['8.8.8.8', '8.8.4.4']
-dns.resolver.default_resolver = _google_resolver
+import os
+
+# ─── Force Google DNS (8.8.8.8) only in local development to bypass ISP/corporate DNS ───
+if os.environ.get("VERCEL") != "1":
+    try:
+        _google_resolver = dns.resolver.Resolver(configure=False)
+        _google_resolver.nameservers = ['8.8.8.8', '8.8.4.4']
+        dns.resolver.default_resolver = _google_resolver
+    except Exception as e:
+        print(f"Failed to configure custom DNS resolver: {e}")
+
 
 class Database:
     client: motor.motor_asyncio.AsyncIOMotorClient = None

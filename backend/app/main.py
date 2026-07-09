@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -41,25 +42,31 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     await connect_to_mongo()
-    start_scheduler()
     
-    # Check if database is empty to trigger initial sync
-    db = get_database()
-    try:
-        contest_count = await db.contests.count_documents({})
-        if contest_count == 0:
-            logger.info("Database is empty. Triggering initial Codeforces sync in the background...")
-            print("Database is empty. Triggering initial Codeforces sync in the background...")
-            # We can run it in a background task so it doesn't block the server startup!
-            import asyncio
-            asyncio.create_task(sync_codeforces_data())
-    except Exception as e:
-        logger.error(f"Error checking initial database status: {e}")
+    # Do not start scheduler or spawn background threads in serverless environments like Vercel
+    if os.environ.get("VERCEL") != "1":
+        start_scheduler()
+        
+        # Check if database is empty to trigger initial sync
+        db = get_database()
+        try:
+            contest_count = await db.contests.count_documents({})
+            if contest_count == 0:
+                logger.info("Database is empty. Triggering initial Codeforces sync in the background...")
+                print("Database is empty. Triggering initial Codeforces sync in the background...")
+                import asyncio
+                asyncio.create_task(sync_codeforces_data())
+        except Exception as e:
+            logger.error(f"Error checking initial database status: {e}")
+    else:
+        logger.info("Running on Vercel: skipping scheduler and startup background sync.")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    shutdown_scheduler()
+    if os.environ.get("VERCEL") != "1":
+        shutdown_scheduler()
     await close_mongo_connection()
+
 
 # Include routers
 app.include_router(auth_router, prefix="/api")
