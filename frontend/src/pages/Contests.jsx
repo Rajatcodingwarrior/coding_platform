@@ -186,15 +186,15 @@ export const Contests = () => {
   }, {});
 
   return (
-    <div style={{ minHeight: "calc(100vh - 55px)", background: "var(--bg-deep)" }}>
+    <div style={{ background: "var(--bg-deep)" }}>
       <div className="container contests-container">
 
         {/* ── Page header ── */}
-        <div style={{ marginBottom: "1.75rem" }}>
-          <h2 style={{ fontSize: "1.6rem", fontWeight: 700, marginBottom: "0.4rem" }}>
+        <div style={{ marginBottom: "clamp(1rem, 3vw, 1.75rem)" }}>
+          <h2 style={{ fontSize: "clamp(1.15rem, 4vw, 1.6rem)", fontWeight: 700, marginBottom: "0.4rem" }}>
             Contest Problems
           </h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.92rem" }}>
+          <p style={{ color: "var(--text-muted)", fontSize: "clamp(0.8rem, 2.5vw, 0.92rem)" }}>
             Latest problems from Codeforces, LeetCode, CodeChef &amp; AtCoder — all in one place.
           </p>
         </div>

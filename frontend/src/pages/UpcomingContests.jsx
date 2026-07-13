@@ -115,12 +115,12 @@ export const UpcomingContests = () => {
   );
 
   return (
-    <div className="container" style={{ padding: "2rem 1rem", minHeight: "calc(100vh - 55px)" }}>
+    <div className="container contests-container">
       {/* Header section */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "clamp(1rem, 3vw, 2rem)", flexWrap: "wrap", gap: "1rem" }}>
         <div>
-          <h2 style={{ fontSize: "1.75rem", fontWeight: "700" }}>Upcoming Contest Calendar</h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: "0.25rem" }}>
+          <h2 style={{ fontSize: "clamp(1.15rem, 4vw, 1.75rem)", fontWeight: "700" }}>Upcoming Contest Calendar</h2>
+          <p style={{ color: "var(--text-muted)", fontSize: "clamp(0.8rem, 2.5vw, 0.92rem)", marginTop: "0.25rem" }}>
             Track and register for upcoming competitions from major platforms.
           </p>
         </div>
@@ -135,7 +135,7 @@ export const UpcomingContests = () => {
       </div>
 
       {/* Platform filters */}
-      <div className="glass-card" style={{ padding: "0.75rem 1rem", marginBottom: "2rem", display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+      <div className="glass-card" style={{ padding: "0.65rem 0.75rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", overflowX: "auto" }}>
         <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "0.35rem", marginRight: "0.5rem" }}>
           <Filter size={13} /> Filter:
         </span>
@@ -177,7 +177,7 @@ export const UpcomingContests = () => {
           </p>
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 320px), 1fr))", gap: "1rem" }}>
           {filteredContests.map((c) => {
             const cfg = platformConfig[c.platform] || { color: "#ffa116", label: c.platform.toUpperCase(), url: "#" };
             return (
@@ -185,12 +185,12 @@ export const UpcomingContests = () => {
                 key={c.id} 
                 className="glass-card animate-fade" 
                 style={{ 
-                  padding: "1.5rem", 
+                  padding: "clamp(1rem, 3vw, 1.5rem)", 
                   borderLeft: `4px solid ${cfg.color}`,
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
-                  minHeight: "200px"
+                  minHeight: "180px"
                 }}
               >
                 <div>
