@@ -170,31 +170,31 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="container dashboard-container" style={{ minHeight: "calc(100vh - 55px)" }}>
+    <div className="container dashboard-container">
       {/* Welcome banner */}
       <div className="glass-card animate-fade" style={{ 
-        padding: "2rem", 
-        marginBottom: "2rem", 
+        padding: "clamp(1rem, 3vw, 2rem)", 
+        marginBottom: "1.5rem", 
         background: "linear-gradient(135deg, rgba(255, 161, 22, 0.08) 0%, rgba(13, 110, 253, 0) 100%)",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         flexWrap: "wrap",
-        gap: "1.5rem"
+        gap: "1rem"
       }}>
         <div>
-          <h2 style={{ fontSize: "1.75rem", marginBottom: "0.5rem" }}>
+          <h2 style={{ fontSize: "clamp(1.15rem, 4vw, 1.75rem)", marginBottom: "0.35rem" }}>
             Welcome back, <span style={{ color: "var(--color-primary)" }}>{user.username}</span>!
           </h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.95rem" }}>
-            Track your progress, solve Codeforces problems, and test your C++ solutions.
+          <p style={{ color: "var(--text-muted)", fontSize: "clamp(0.8rem, 2.5vw, 0.95rem)" }}>
+            Track your progress, solve problems, and test your solutions.
           </p>
         </div>
         <button 
           onClick={handleChooseForMe}
           disabled={choosing || !stats || stats.total_questions === 0}
           className="btn btn-primary flex-center"
-          style={{ gap: "0.5rem", fontSize: "0.95rem", padding: "0.75rem 1.5rem" }}
+          style={{ gap: "0.5rem", fontSize: "clamp(0.8rem, 2.5vw, 0.95rem)", padding: "0.6rem 1.2rem", whiteSpace: "nowrap" }}
         >
           <Shuffle size={18} />
           {choosing ? "Choosing..." : "Choose for me"}
