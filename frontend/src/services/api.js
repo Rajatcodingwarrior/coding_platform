@@ -88,6 +88,14 @@ export const api = {
       if (!res.ok) throw new Error("Failed to trigger sync");
       return res.json();
     },
+    upcoming: async () => {
+      const res = await fetch(`${API_BASE_URL}/contests/upcoming`, {
+        method: "GET",
+        headers: getHeaders(),
+      });
+      if (!res.ok) throw new Error("Failed to fetch upcoming contests");
+      return res.json();
+    },
   },
 
   questions: {
@@ -119,6 +127,15 @@ export const api = {
         body: JSON.stringify({ question_id: questionId, code }),
       });
       if (!res.ok) throw new Error("Submission failed");
+      return res.json();
+    },
+    aiHint: async (questionId, code, compileError) => {
+      const res = await fetch(`${API_BASE_URL}/compiler/ai-hint`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ question_id: questionId, code, compile_error: compileError }),
+      });
+      if (!res.ok) throw new Error("AI Hint request failed");
       return res.json();
     },
   },

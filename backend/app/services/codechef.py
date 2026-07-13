@@ -70,6 +70,83 @@ def parse_codechef_samples(body_html: str) -> list:
         
     return test_cases
 
+def markdown_to_html(md: str) -> str:
+    """
+    Converts raw markdown text to standard HTML paragraphs, headers,
+    bold/italic formatting, links, lists, and images to support CodeChef rendering.
+    """
+    if not md:
+        return ""
+    
+    # If it already looks like HTML, bypass parsing
+    if "<p>" in md or "<div>" in md or "<br" in md:
+        return md
+
+    # Standardize line endings
+    html = md.replace("\r\n", "\n").replace("\r", "\n")
+
+    # 1. Headers
+    html = re.sub(r'^###\s+(.*?)$', r'<h3>\1</h3>', html, flags=re.MULTILINE)
+    html = re.sub(r'^##\s+(.*?)$', r'<h2>\1</h2>', html, flags=re.MULTILINE)
+    html = re.sub(r'^#\s+(.*?)$', r'<h1>\1</h1>', html, flags=re.MULTILINE)
+
+    # 2. Horizontal Rules
+    html = re.sub(r'^---+$', r'<hr />', html, flags=re.MULTILINE)
+    html = re.sub(r'^___+$', r'<hr />', html, flags=re.MULTILINE)
+
+    # 3. Images: ![alt](url)
+    html = re.sub(r'!\[(.*?)\]\((.*?)\)', r'<img src="\2" alt="\1" class="problem-statement-img" style="max-width:100%; border-radius:6px; margin:0.5rem 0;" />', html)
+
+    # 4. Links: [text](url)
+    html = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2" target="_blank" rel="noopener noreferrer" style="color: var(--color-info); text-decoration: underline;">\1</a>', html)
+
+    # 5. Bold & Italic
+    html = re.sub(r'\*\*\*(.*?)\*\*\*', r'<strong><em>\1</em></strong>', html)
+    html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', html)
+    html = re.sub(r'\*(.*?)\*', r'<em>\1</em>', html)
+    html = re.sub(r'__(.*?)__', r'<strong>\1</strong>', html)
+    html = re.sub(r'_(.*?)_', r'<em>\1</em>', html)
+
+    # 6. Inline Code: `code`
+    html = re.sub(r'`(.*?)`', r'<code style="background: rgba(255,255,255,0.06); padding: 2px 4px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.85em;">\1</code>', html)
+
+    # 7. Convert Lists
+    lines = html.split("\n")
+    in_list = False
+    new_lines = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith(("- ", "* ", "+ ")):
+            content = stripped[2:]
+            if not in_list:
+                new_lines.append("<ul>")
+                in_list = True
+            new_lines.append(f"  <li>{content}</li>")
+        else:
+            if in_list:
+                new_lines.append("</ul>")
+                in_list = False
+            new_lines.append(line)
+    if in_list:
+        new_lines.append("</ul>")
+    
+    html = "\n".join(new_lines)
+
+    # 8. Convert Paragraphs (double newlines)
+    paragraphs = html.split("\n\n")
+    p_lines = []
+    for p in paragraphs:
+        p_strip = p.strip()
+        if not p_strip:
+            continue
+        if p_strip.startswith(("<ul", "<ol", "<h1", "<h2", "<h3", "<hr", "<div")):
+            p_lines.append(p_strip)
+        else:
+            p_formatted = p_strip.replace("\n", "<br />")
+            p_lines.append(f"<p style='margin-bottom: 0.8rem; line-height: 1.7;'>{p_formatted}</p>")
+
+    return "\n".join(p_lines)
+
 async def sync_codechef_data():
     """
     Sync CodeChef latest 5 completed contests and their problems.
@@ -187,7 +264,8 @@ async def sync_codechef_data():
                     r_prob = await loop.run_in_executor(None, lambda: scraper.get(prob_url, headers=headers, timeout=10))
                     if r_prob.status_code == 200:
                         prob_data = r_prob.json()
-                        body_html = prob_data.get("body", "")
+                        body_raw = prob_data.get("body", "")
+                        body_html = markdown_to_html(body_raw)
                         difficulty = int(prob_data.get("difficulty_rating") or 1000)
                         rs = compute_rating_and_stars('codechef', difficulty_rating=difficulty)
                         rating = rs['rating']

@@ -58,6 +58,51 @@ export const Contests = () => {
   const [viewMode, setViewMode]               = useState("list"); // "list" or "problems" on mobile
   const navigate = useNavigate();
 
+  const getGoogleCalendarLink = (contest) => {
+    const title = encodeURIComponent(contest.name);
+    const startDate = new Date(contest.start_time_seconds * 1000)
+      .toISOString()
+      .replace(/-|:|\.\d\d\d/g, ""); // YYYYMMDDTHHmmSSZ
+    const endDate = new Date((contest.start_time_seconds + (contest.duration_seconds || 7200)) * 1000)
+      .toISOString()
+      .replace(/-|:|\.\d\d\d/g, "");
+    const details = encodeURIComponent(`Platform: ${contest.platform || 'codeforces'}`);
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${endDate}&details=${details}`;
+  };
+
+  const downloadICS = (contest) => {
+    const title = contest.name;
+    const startDate = new Date(contest.start_time_seconds * 1000)
+      .toISOString()
+      .replace(/-|:|\.\d\d\d/g, "");
+    const endDate = new Date((contest.start_time_seconds + (contest.duration_seconds || 7200)) * 1000)
+      .toISOString()
+      .replace(/-|:|\.\d\d\d/g, "");
+    
+    const icsContent = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Coding Portal//Contest Sync//EN",
+      "BEGIN:VEVENT",
+      `UID:contest_${contest.id || 'id'}@coding_portal`,
+      `DTSTAMP:${new Date().toISOString().replace(/-|:|\.\d\d\d/g, "")}`,
+      `DTSTART:${startDate}`,
+      `DTEND:${endDate}`,
+      `SUMMARY:${title}`,
+      `DESCRIPTION:Platform: ${contest.platform || 'codeforces'}`,
+      "END:VEVENT",
+      "END:VCALENDAR"
+    ].join("\r\n");
+
+    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute("download", `${contest.id || 'contest'}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => { fetchContests(); }, []);
 
   const fetchContests = async () => {
@@ -221,15 +266,62 @@ export const Contests = () => {
               >
                 <ChevronLeft size={14} /> Back to Contests
               </button>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.2rem" }}>
                     <PlatformBadge platform={selectedContest.platform || "codeforces"} />
-                    <h3 style={{ fontSize: "1.1rem" }}>{selectedContest.name}</h3>
+                    <h3 style={{ fontSize: "1.15rem", fontWeight: "700" }}>{selectedContest.name}</h3>
                   </div>
                   <p style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
                     {formatDate(selectedContest.start_time_seconds)} · {Math.round(selectedContest.duration_seconds / 3600)}h
                   </p>
+                </div>
+
+                {/* Calendar Sync Buttons */}
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <a
+                    href={getGoogleCalendarLink(selectedContest)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-secondary"
+                    style={{ 
+                      padding: "6px 12px", 
+                      fontSize: "0.75rem", 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: "0.4rem",
+                      borderRadius: "6px",
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid var(--border-color)",
+                      color: "var(--text-main)",
+                      textDecoration: "none",
+                      cursor: "pointer"
+                    }}
+                    title="Add to Google Calendar"
+                  >
+                    <Calendar size={13} style={{ color: "var(--color-primary)" }} />
+                    <span>Google Calendar</span>
+                  </a>
+                  <button
+                    onClick={() => downloadICS(selectedContest)}
+                    className="btn btn-secondary"
+                    style={{ 
+                      padding: "6px 12px", 
+                      fontSize: "0.75rem", 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: "0.4rem",
+                      borderRadius: "6px",
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid var(--border-color)",
+                      color: "var(--text-main)",
+                      cursor: "pointer"
+                    }}
+                    title="Download ICS File"
+                  >
+                    <Clock size={13} style={{ color: "var(--color-info)" }} />
+                    <span>Download ICS</span>
+                  </button>
                 </div>
               </div>
 
@@ -250,8 +342,8 @@ export const Contests = () => {
                         <tr>
                           <th style={{ width: 40 }}></th>
                           <th>Problem</th>
-                          <th style={{ width: 110 }}>Difficulty</th>
-                          <th style={{ width: 90 }}>Rating</th>
+                          <th style={{ width: 120 }}>Rating &amp; Stars</th>
+                          <th style={{ width: 100 }}>Difficulty</th>
                           <th style={{ width: 50, textAlign: "center" }}>★</th>
                           <th style={{ width: 40 }}></th>
                         </tr>
@@ -280,21 +372,23 @@ export const Contests = () => {
                               </div>
                             </td>
                             <td>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                                <span className={`badge ${getDiffClass(q.rating)}`}>
-                                  {getDiffLabel(q.rating)}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                <span className="rating-tag" style={{ background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: "600", color: getRatingColor(q.rating) }}>
+                                  {q.rating}
                                 </span>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                                  <span className="rating-tag">{q.rating}</span>
-                                  {q.stars > 0 && (
-                                    <span style={{ color: getRatingColor(q.rating), fontSize: '0.7rem', letterSpacing: '-1px' }}>
-                                      {getStarDisplay(q.stars)}
-                                    </span>
-                                  )}
-                                </div>
+                                {q.stars > 0 && (
+                                  <span style={{ color: getRatingColor(q.rating), fontSize: '0.75rem', letterSpacing: '-0.5px', fontWeight: "bold" }}>
+                                    {getStarDisplay(q.stars)}
+                                  </span>
+                                )}
                               </div>
                             </td>
-                            <td style={{ textAlign: "center" }}>
+                            <td>
+                              <span className={`badge ${getDiffClass(q.rating)}`}>
+                                {getDiffLabel(q.rating)}
+                              </span>
+                            </td>
+                            <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
                               <button
                                 onClick={(e) => handleToggleFavorite(e, q.id, q.is_favorite)}
                                 style={{ background: "none", border: "none", cursor: "pointer", color: q.is_favorite ? "var(--color-primary)" : "var(--text-muted)", padding: "0.2rem" }}
@@ -302,7 +396,7 @@ export const Contests = () => {
                                 <Star size={15} fill={q.is_favorite ? "var(--color-primary)" : "none"} />
                               </button>
                             </td>
-                            <td>
+                            <td style={{ textAlign: "right" }}>
                               <ChevronRight size={15} style={{ color: "var(--text-muted)" }} />
                             </td>
                           </tr>

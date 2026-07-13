@@ -4,7 +4,7 @@ import { api } from "../services/api";
 import {
   Play, Send, CheckCircle, XCircle, RefreshCw, Star,
   BookOpen, ExternalLink, Code, Terminal, Check, X,
-  Timer, Pause, RotateCcw, Copy, ChevronLeft, Search, GitFork
+  Timer, Pause, RotateCcw, Copy, ChevronLeft, Search, GitFork, Zap
 } from "lucide-react";
 
 // ── Platform badge helper ──────────────────────────────────────
@@ -122,6 +122,25 @@ export const ProblemDetails = () => {
   const [activePane, setActivePane] = useState("left"); // "left" or "right"
 
   const textareaRef = useRef(null);
+
+  const [loadingHint, setLoadingHint] = useState(false);
+  const [aiHint, setAiHint]           = useState(null);
+  const [hintError, setHintError]     = useState(null);
+
+  const handleGetAIHint = async () => {
+    setLoadingHint(true);
+    setAiHint(null);
+    setHintError(null);
+    try {
+      const compileErr = runResult?.compile_error || submitResult?.compile_error || "";
+      const res = await api.compiler.aiHint(questionId, code, compileErr);
+      setAiHint(res.hint);
+    } catch (e) {
+      setHintError(e.message || "Failed to get AI Hint");
+    } finally {
+      setLoadingHint(false);
+    }
+  };
 
   // ── MathJax typeset on description tab ──────────────────────
   useEffect(() => {
@@ -275,8 +294,8 @@ export const ProblemDetails = () => {
         <div className="pane-header" style={{ gap: "1rem" }}>
           <button
             style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", display: "flex", alignItems: "center", marginRight: "0.25rem" }}
-            onClick={() => navigate("/contests")}
-            title="Back to contests"
+            onClick={() => navigate(-1)}
+            title="Go Back"
           >
             <ChevronLeft size={16} />
           </button>
@@ -485,6 +504,9 @@ export const ProblemDetails = () => {
             <div onClick={() => setRightTab("console")} className={`pane-tab ${rightTab === "console" ? "active" : ""}`}>
               <Terminal size={13} /> <span className="tab-label">Console</span>
             </div>
+            <div onClick={() => setRightTab("ai-tutor")} className={`pane-tab ${rightTab === "ai-tutor" ? "active" : ""}`}>
+              <Zap size={13} style={{ color: "var(--color-primary)" }} /> <span className="tab-label">AI Tutor</span>
+            </div>
           </div>
           {/* Mark solved button */}
           <button
@@ -575,7 +597,7 @@ export const ProblemDetails = () => {
               </div>
             </div>
           </>
-        ) : (
+        ) : rightTab === "console" ? (
           /* ── Console Tab ── */
           <div className="pane-content" style={{ backgroundColor: "#111", height: "100%", overflowY: "auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
@@ -722,6 +744,79 @@ export const ProblemDetails = () => {
                 <p style={{ fontSize: "0.88rem" }}>Run or submit your code to see output here.</p>
               </div>
             )}
+          </div>
+        ) : (
+          /* ── AI Tutor Tab ── */
+          <div className="pane-content animate-fade" style={{ background: "#111", height: "100%", display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Zap size={18} style={{ color: "var(--color-primary)" }} />
+              <h3 style={{ fontSize: "1rem", fontWeight: "700" }}>AI Programming Tutor</h3>
+            </div>
+            <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", lineHeight: "1.5" }}>
+              Claude will inspect your C++ code and point out logic flaws, edge cases, or runtime traps (like overflow) without giving away the direct answer.
+            </p>
+            
+            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: "1.5rem" }}>
+              {loadingHint ? (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
+                  <RefreshCw size={32} className="animate-spin" style={{ color: "var(--color-primary)" }} />
+                  <p style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>Analyzing your code with Claude…</p>
+                </div>
+              ) : aiHint ? (
+                <div className="animate-pop" style={{
+                  background: "rgba(255, 161, 22, 0.04)",
+                  border: "1px solid rgba(255, 161, 22, 0.15)",
+                  borderRadius: "10px",
+                  padding: "1.5rem",
+                  width: "100%",
+                  maxWidth: "500px",
+                  boxShadow: "var(--shadow-sm)"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--color-primary)" }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 22h20L12 2zm0 3.99L19.53 19H4.47L12 5.99zM13 16h-2v2h2v-2zm0-6h-2v4h2v-4z"/></svg>
+                    Claude AI Hint
+                  </div>
+                  <p style={{ fontSize: "0.9rem", lineHeight: "1.65", color: "var(--text-main)", whiteSpace: "pre-wrap" }}>
+                    {aiHint}
+                  </p>
+                </div>
+              ) : hintError ? (
+                <div className="animate-pop" style={{
+                  background: "var(--color-error-bg)",
+                  border: "1px solid rgba(239, 71, 67, 0.2)",
+                  borderRadius: "10px",
+                  padding: "1.25rem",
+                  width: "100%",
+                  maxWidth: "500px",
+                  color: "#f87171",
+                  fontSize: "0.88rem"
+                }}>
+                  <strong>Error getting hint</strong>: {hintError}
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", color: "var(--text-muted)", textAlign: "center", padding: "1.5rem" }}>
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.3 }}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l3.722-1.39 3.473-1.299L17 21l-.777-5.096m0 0l.334-2.185C18.16 11.488 19 9.387 19 7a7 7 0 10-14 0c0 2.386.84 4.488 2.44 6.719l.334 2.185m10.038-2.185a8.966 8.966 0 00-3.328-5.328M6.719 13.72l3.328-5.328m0 0L12 2l1.953 6.392"/></svg>
+                  <p style={{ fontSize: "0.88rem" }}>Write some code, compile it if needed, and ask the AI Tutor for assistance.</p>
+                </div>
+              )}
+            </div>
+
+            <div style={{ marginTop: "auto", borderTop: "1px solid #2a2a2a", paddingTop: "1rem", display: "flex", justifyContent: "flex-end" }}>
+              <button
+                disabled={loadingHint || !code}
+                onClick={handleGetAIHint}
+                className="btn btn-primary animate-fade"
+                style={{ 
+                  gap: "0.4rem", 
+                  fontSize: "0.82rem", 
+                  padding: "0.5rem 1.25rem",
+                  boxShadow: "0 0 15px rgba(255, 161, 22, 0.15)"
+                }}
+              >
+                <Zap size={14} fill="currentColor" />
+                <span>{aiHint ? "Get Another Hint" : "Ask Claude for a Hint"}</span>
+              </button>
+            </div>
           </div>
         )}
       </div>

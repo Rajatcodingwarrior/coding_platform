@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
     CORS_ALLOWED_ORIGINS: str = "*"
+    CRON_SECRET: str = "default_cron_secret_key_12345"
 
     class Config:
         env_file = ENV_FILE_PATH

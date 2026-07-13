@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
-import { Terminal, LogOut, RefreshCw, BarChart2, BookOpen, Menu, X } from "lucide-react";
+import { Terminal, LogOut, RefreshCw, BarChart2, BookOpen, Menu, X, Calendar } from "lucide-react";
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
@@ -52,6 +52,9 @@ export const Navbar = () => {
             </NavLink>
             <NavLink to="/contests" className={({ isActive }) => `nav-link flex-center ${isActive ? 'active' : ''}`} style={{ gap: '0.4rem' }}>
               <BookOpen size={16} /> Contests
+            </NavLink>
+            <NavLink to="/upcoming" className={({ isActive }) => `nav-link flex-center ${isActive ? 'active' : ''}`} style={{ gap: '0.4rem' }}>
+              <Calendar size={16} /> Calendar
             </NavLink>
             
             <button 
@@ -104,6 +107,13 @@ export const Navbar = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <BookOpen size={16} /> Contests
+              </NavLink>
+              <NavLink 
+                to="/upcoming" 
+                className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`} 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Calendar size={16} /> Calendar
               </NavLink>
               
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "0.5rem" }}>

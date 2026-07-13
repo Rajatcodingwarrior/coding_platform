@@ -10,12 +10,24 @@ from app.routes.contests import QuestionSummary
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard & Profile"])
 
+class DailyActivity(BaseModel):
+    date: str
+    count: int
+
+class PlatformBreakdown(BaseModel):
+    codeforces: int = 0
+    leetcode: int = 0
+    codechef: int = 0
+    atcoder: int = 0
+
 class DashboardStats(BaseModel):
     total_questions: int
     solved_questions: int
     completion_rate: float
     favorite_count: int
     favorites: List[QuestionSummary]
+    daily_activities: List[DailyActivity] = []
+    platform_breakdown: PlatformBreakdown = PlatformBreakdown()
 
 class ToggleFavoriteRequest(BaseModel):
     is_favorite: bool
@@ -71,12 +83,44 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
             q["is_solved"] = solved_doc is not None
             favorites.append(q)
             
+    # 5. Fetch daily solve dates
+    activities_cursor = db.user_progress.find({
+        "user_id": user_id,
+        "status": "solved",
+        "solved_at": {"$ne": None}
+    }, {"solved_at": 1})
+    
+    activity_counts = {}
+    async for doc in activities_cursor:
+        solved_at = doc.get("solved_at")
+        if solved_at:
+            date_str = solved_at.strftime("%Y-%m-%d")
+            activity_counts[date_str] = activity_counts.get(date_str, 0) + 1
+            
+    daily_activities = [{"date": d, "count": c} for d, c in activity_counts.items()]
+            
+    # 6. Fetch platform breakdowns
+    platform_breakdown = {}
+    for slug in ["codeforces", "leetcode", "codechef", "atcoder"]:
+        q_cursor = db.questions.find({"platform": slug}, {"_id": 1})
+        q_ids = [doc["_id"] for doc in await q_cursor.to_list(length=2000)]
+        solved_count = 0
+        if q_ids:
+            solved_count = await db.user_progress.count_documents({
+                "user_id": user_id,
+                "question_id": {"$in": q_ids},
+                "status": "solved"
+            })
+        platform_breakdown[slug] = solved_count
+
     return {
         "total_questions": total_questions,
         "solved_questions": solved_questions,
         "completion_rate": completion_rate,
         "favorite_count": favorite_count,
-        "favorites": favorites
+        "favorites": favorites,
+        "daily_activities": daily_activities,
+        "platform_breakdown": platform_breakdown
     }
 
 @router.get("/choose-for-me")

@@ -1,18 +1,22 @@
 import logging
 from datetime import datetime
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status, Header
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from app.database import get_database
 from app.auth import get_current_user
+from app.config import settings
 from app.services.codeforces import sync_codeforces_data
 from app.services.rating_system import rating_to_stars
 from app.services.leetcode import sync_leetcode_data
 from app.services.codechef import sync_codechef_data
 from app.services.atcoder import sync_atcoder_data
+from app.services.upcoming_contests import sync_upcoming_contests
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Contests & Questions"])
+security = HTTPBearer(auto_error=False)
 
 # ─── Response Models ───────────────────────────────────────────────────────────
 
@@ -34,6 +38,14 @@ class ContestResponse(BaseModel):
     start_time_seconds: int
     synced_at: datetime
     platform: str = "codeforces"
+
+class UpcomingContestResponse(BaseModel):
+    id: str
+    name: str
+    platform: str
+    start_time_seconds: int
+    duration_seconds: int
+    synced_at: datetime
 
 class QuestionSummary(BaseModel):
     id: str
@@ -164,6 +176,31 @@ async def get_contests():
         contests.append(doc)
     return contests
 
+@router.get("/contests/upcoming", response_model=List[UpcomingContestResponse])
+async def get_upcoming_contests():
+    db = get_database()
+    now_ts = int(datetime.utcnow().timestamp())
+    
+    # Auto-trigger upcoming contests sync if empty
+    count = await db.future_contests.count_documents({"start_time_seconds": {"$gte": now_ts - 7200}})
+    if count == 0:
+        try:
+            logger.info("Database has 0 upcoming contests. Running fast sync...")
+            await sync_upcoming_contests()
+        except Exception as e:
+            logger.error(f"Failed to auto-sync upcoming contests: {e}")
+            
+    cursor = db.future_contests.find({
+        "start_time_seconds": {"$gte": now_ts - 7200}
+    }).sort("start_time_seconds", 1)
+    upcoming = []
+    async for doc in cursor:
+        doc["id"] = doc["_id"]
+        doc.setdefault("duration_seconds", 7200)
+        doc.setdefault("synced_at", datetime.utcnow())
+        upcoming.append(doc)
+    return upcoming
+
 @router.get("/contests/{contest_id}/questions", response_model=List[QuestionSummary])
 async def get_contest_questions(contest_id: str, current_user: dict = Depends(get_current_user)):
     db = get_database()
@@ -240,10 +277,41 @@ async def sync_all_platforms():
             await fn()
         except Exception as e:
             logger.error(f"{name} sync error: {e}")
+    try:
+        await sync_upcoming_contests()
+    except Exception as e:
+        logger.error(f"Upcoming contests sync error: {e}")
     logger.info("Multi-platform sync complete.")
 
 @router.post("/contests/sync", status_code=status.HTTP_202_ACCEPTED)
-async def trigger_sync(background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
-    """Triggers a manual sync for all platforms in the background."""
+async def trigger_sync(
+    background_tasks: BackgroundTasks, 
+    cron_key: Optional[str] = None,
+    x_cron_key: Optional[str] = Header(None),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
+):
+    """
+    Triggers a manual sync for all platforms in the background.
+    Supports either JWT user authentication or a secure CRON_SECRET bypass key.
+    """
+    incoming_key = cron_key or x_cron_key
+    if incoming_key and incoming_key == settings.CRON_SECRET:
+        logger.info("Synchronization triggered via secure CRON_SECRET bypass.")
+    else:
+        if not credentials:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not authenticated. Provide a valid Bearer token or Cron Key in headers/query."
+            )
+        try:
+            await get_current_user(credentials)
+        except HTTPException as e:
+            raise e
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials"
+            )
+
     background_tasks.add_task(sync_all_platforms)
     return {"detail": "Multi-platform synchronization triggered in the background"}

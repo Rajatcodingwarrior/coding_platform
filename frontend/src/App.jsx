@@ -7,6 +7,7 @@ import { Signup } from "./pages/Signup";
 import { Dashboard } from "./pages/Dashboard";
 import { Contests } from "./pages/Contests";
 import { ProblemDetails } from "./pages/ProblemDetails";
+import { UpcomingContests } from "./pages/UpcomingContests";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -57,6 +58,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ProblemDetails />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/upcoming" 
+                element={
+                  <ProtectedRoute>
+                    <UpcomingContests />
                   </ProtectedRoute>
                 } 
               />

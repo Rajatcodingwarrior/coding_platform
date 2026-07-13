@@ -5,6 +5,14 @@ from pydantic import BaseModel
 from app.database import get_database
 from app.auth import get_current_user
 from app.services.compiler import run_code
+from app.services.ai_tutor import get_tutor_hint
+
+class AIHintRequest(BaseModel):
+    question_id: str
+    code: str
+    compile_error: Optional[str] = None
+    expected_output: Optional[str] = None
+    actual_output: Optional[str] = None
 
 router = APIRouter(prefix="/compiler", tags=["Code Compiler & Runner"])
 
@@ -158,3 +166,34 @@ async def submit_question_code(req: SubmitCodeRequest, current_user: dict = Depe
         results=results,
         compile_error=compilation_error_str
     )
+
+@router.post("/ai-hint")
+async def get_ai_hint(req: AIHintRequest, current_user: dict = Depends(get_current_user)):
+    """
+    Analyzes C++ code against compilation errors or test case output mismatch
+    and returns a short educational hint.
+    """
+    db = get_database()
+    
+    # 1. Fetch question details
+    q = await db.questions.find_one({"_id": req.question_id})
+    if not q:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Question not found"
+        )
+        
+    problem_title = q.get("name", "Problem")
+    description_html = q.get("description_html", "")
+    tags = q.get("tags", [])
+    
+    # 2. Query tutor hint
+    hint = await get_tutor_hint(
+        code=req.code,
+        problem_title=problem_title,
+        description_html=description_html,
+        tags=tags,
+        compile_error=req.compile_error
+    )
+    
+    return {"hint": hint}
