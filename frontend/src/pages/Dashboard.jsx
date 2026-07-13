@@ -57,15 +57,15 @@ const ActivityHeatmap = ({ activities }) => {
   ];
 
   return (
-    <div className="glass-card" style={{ padding: "1.5rem", marginBottom: "2rem" }}>
-      <h3 style={{ fontSize: "1.05rem", fontWeight: "600", color: "var(--text-main)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+    <div className="glass-card" style={{ padding: "clamp(0.75rem, 3vw, 1.5rem)", marginBottom: "clamp(1rem, 3vw, 2rem)" }}>
+      <h3 style={{ fontSize: "clamp(0.85rem, 2.5vw, 1.05rem)", fontWeight: "600", color: "var(--text-main)", marginBottom: "0.75rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
         <BarChart size={16} style={{ color: "var(--color-primary)" }} />
         <span>Submissions Activity</span>
       </h3>
       
-      <div style={{ display: "flex", gap: "0.5rem", overflowX: "auto", paddingBottom: "0.5rem" }}>
+      <div className="heatmap-scroll">
         {/* Day label column */}
-        <div style={{ display: "grid", gridTemplateRows: "repeat(7, 10px)", gap: "3px", fontSize: "0.68rem", color: "var(--text-muted)", alignContent: "center", justifyItems: "end", paddingRight: "0.25rem", userSelect: "none" }}>
+        <div style={{ display: "grid", gridTemplateRows: "repeat(7, 10px)", gap: "3px", fontSize: "0.6rem", color: "var(--text-muted)", alignContent: "center", justifyItems: "end", paddingRight: "0.25rem", userSelect: "none", flexShrink: 0 }}>
           <span>Sun</span>
           <span></span>
           <span>Tue</span>
@@ -99,7 +99,7 @@ const ActivityHeatmap = ({ activities }) => {
         </div>
       </div>
       
-      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "0.4rem", fontSize: "0.72rem", color: "var(--text-muted)", marginTop: "0.75rem", userSelect: "none" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "0.35rem", fontSize: "0.65rem", color: "var(--text-muted)", marginTop: "0.5rem", userSelect: "none" }}>
         <span>Less</span>
         <div style={{ width: 10, height: 10, backgroundColor: colors[0], borderRadius: 2 }} />
         <div style={{ width: 10, height: 10, backgroundColor: colors[1], borderRadius: 2 }} />
@@ -173,14 +173,14 @@ export const Dashboard = () => {
     <div className="container dashboard-container">
       {/* Welcome banner */}
       <div className="glass-card animate-fade" style={{ 
-        padding: "clamp(1rem, 3vw, 2rem)", 
-        marginBottom: "1.5rem", 
+        padding: "clamp(0.75rem, 3vw, 2rem)", 
+        marginBottom: "clamp(0.75rem, 2vw, 1.5rem)", 
         background: "linear-gradient(135deg, rgba(255, 161, 22, 0.08) 0%, rgba(13, 110, 253, 0) 100%)",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         flexWrap: "wrap",
-        gap: "1rem"
+        gap: "0.75rem"
       }}>
         <div>
           <h2 style={{ fontSize: "clamp(1.15rem, 4vw, 1.75rem)", marginBottom: "0.35rem" }}>
@@ -194,7 +194,7 @@ export const Dashboard = () => {
           onClick={handleChooseForMe}
           disabled={choosing || !stats || stats.total_questions === 0}
           className="btn btn-primary flex-center"
-          style={{ gap: "0.5rem", fontSize: "clamp(0.8rem, 2.5vw, 0.95rem)", padding: "0.6rem 1.2rem", whiteSpace: "nowrap" }}
+          style={{ gap: "0.4rem", fontSize: "clamp(0.78rem, 2.5vw, 0.9rem)", padding: "0.5rem 1rem", whiteSpace: "nowrap", flex: "0 0 auto" }}
         >
           <Shuffle size={18} />
           {choosing ? "Choosing..." : "Choose for me"}
@@ -206,16 +206,16 @@ export const Dashboard = () => {
       <div className="dashboard-grid">
         {/* Left Column: Stats & Completion */}
         <div className="stats-sidebar">
-          <h3 style={{ fontSize: "1.1rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.25rem" }}>
+          <h3 style={{ fontSize: "clamp(0.85rem, 2.5vw, 1.1rem)", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.25rem" }}>
             My Statistics
           </h3>
 
-          <div className="glass-card" style={{ padding: "1.5rem" }}>
+          <div className="glass-card" style={{ padding: "clamp(0.75rem, 3vw, 1.5rem)" }}>
             {/* Circular Progress & Key stats */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.75rem", gap: "1.5rem" }}>
-              <div style={{ position: "relative", width: "90px", height: "90px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "clamp(1rem, 3vw, 1.75rem)", gap: "1rem" }}>
+              <div style={{ position: "relative", width: "80px", height: "80px", display: "flex", justifyContent: "center", alignItems: "center", flexShrink: 0 }}>
                 {/* SVG Progress Ring */}
-                <svg width="90" height="90" viewBox="0 0 90 90" style={{ transform: "rotate(-90deg)", position: "absolute" }}>
+                <svg width="80" height="80" viewBox="0 0 90 90" style={{ transform: "rotate(-90deg)", position: "absolute" }}>
                   <circle cx="45" cy="45" r="36" stroke="rgba(255,255,255,0.06)" strokeWidth="6" fill="transparent" />
                   <circle 
                     cx="45" 
@@ -231,14 +231,14 @@ export const Dashboard = () => {
                   />
                 </svg>
                 <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: "1.1rem", fontWeight: "700", color: "var(--text-main)" }}>{stats.completion_rate}%</div>
-                  <div style={{ fontSize: "0.58rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Solved</div>
+                  <div style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)", fontWeight: "700", color: "var(--text-main)" }}>{stats.completion_rate}%</div>
+                  <div style={{ fontSize: "0.55rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Solved</div>
                 </div>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 <div>
-                  <div style={{ fontSize: "1.35rem", fontWeight: "700", color: "var(--text-bright)" }}>
+                  <div style={{ fontSize: "clamp(1rem, 3vw, 1.35rem)", fontWeight: "700", color: "var(--text-bright)" }}>
                     {stats.solved_questions}
                     <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", fontWeight: "400", marginLeft: "0.2rem" }}>/ {stats.total_questions}</span>
                   </div>
@@ -317,12 +317,12 @@ export const Dashboard = () => {
 
         {/* Right Column: Favorites list */}
         <div className="dashboard-content">
-          <h3 style={{ fontSize: "1.1rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.25rem" }}>
+          <h3 style={{ fontSize: "clamp(0.85rem, 2.5vw, 1.1rem)", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.25rem" }}>
             My Favorite Problems
           </h3>
 
           {stats.favorites.length === 0 ? (
-            <div className="glass-card" style={{ padding: "3rem", textAlign: "center" }}>
+            <div className="glass-card" style={{ padding: "clamp(1.5rem, 5vw, 3rem)", textAlign: "center" }}>
               <Star size={36} style={{ color: "#444", marginBottom: "1rem" }} />
               <h4 style={{ marginBottom: "0.5rem" }}>No Favorites Yet</h4>
               <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
