@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import { BookOpen, CheckCircle, Circle, Star, Calendar, Clock, ChevronRight, ChevronLeft, RefreshCw, Zap } from "lucide-react";
 
@@ -49,13 +49,17 @@ const formatDate = (secs) =>
   });
 
 export const Contests = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlPlatform = searchParams.get("platform") || "all";
+  const urlContestId = searchParams.get("contest") || "";
+
   const [contests, setContests]               = useState([]);
   const [selectedContest, setSelectedContest] = useState(null);
   const [questions, setQuestions]             = useState([]);
   const [loadingContests,  setLoadingContests]  = useState(true);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
-  const [platformFilter, setPlatformFilter]   = useState("all");
-  const [viewMode, setViewMode]               = useState("list"); // "list" or "problems" on mobile
+  const [platformFilter, setPlatformFilter]   = useState(urlPlatform);
+  const [viewMode, setViewMode]               = useState(urlContestId ? "problems" : "list"); // "list" or "problems" on mobile
   const navigate = useNavigate();
 
   const getGoogleCalendarLink = (contest) => {
@@ -103,19 +107,44 @@ export const Contests = () => {
     document.body.removeChild(link);
   };
 
-  useEffect(() => { fetchContests(); }, []);
-
-  const fetchContests = async () => {
-    setLoadingContests(true);
-    try {
-      const data = await api.contests.list();
-      setContests(data);
-    } catch (e) { console.error(e); }
-    finally { setLoadingContests(false); }
-  };
+  useEffect(() => {
+    const loadAndInit = async () => {
+      setLoadingContests(true);
+      try {
+        const data = await api.contests.list();
+        setContests(data);
+        
+        if (urlContestId) {
+          const matched = data.find(c => c.id === urlContestId);
+          if (matched) {
+            setSelectedContest(matched);
+            setLoadingQuestions(true);
+            setViewMode("problems");
+            try {
+              const qData = await api.contests.getQuestions(matched.id);
+              setQuestions(qData);
+            } catch (e) {
+              console.error("Failed to fetch questions for auto-selected contest:", e);
+            } finally {
+              setLoadingQuestions(false);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingContests(false);
+      }
+    };
+    loadAndInit();
+  }, [urlContestId]);
 
   const handleSelectContest = async (contest, shouldSwitchView = true) => {
     setSelectedContest(contest);
+    setSearchParams(prev => {
+      prev.set("contest", contest.id);
+      return prev;
+    });
     setLoadingQuestions(true);
     if (shouldSwitchView) {
       setViewMode("problems");
@@ -133,6 +162,17 @@ export const Contests = () => {
       await api.dashboard.toggleFavorite(qId, !cur);
       setQuestions(qs => qs.map(q => q.id === qId ? { ...q, is_favorite: !cur } : q));
     } catch (err) { console.error(err); }
+  };
+
+  const handlePlatformFilterChange = (key) => {
+    setPlatformFilter(key);
+    setSearchParams(prev => {
+      prev.set("platform", key);
+      prev.delete("contest");
+      return prev;
+    });
+    setSelectedContest(null);
+    setViewMode("list");
   };
 
   const filteredContests = platformFilter === "all"
@@ -168,7 +208,7 @@ export const Contests = () => {
               <button
                 key={key}
                 className={`filter-pill ${isActive ? cfg.pill : ""}`}
-                onClick={() => setPlatformFilter(key)}
+                onClick={() => handlePlatformFilterChange(key)}
                 style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}
               >
                 {key !== "all" && (
@@ -262,7 +302,14 @@ export const Contests = () => {
             <div className={`contests-problems-pane ${viewMode === "list" ? "mobile-hidden" : ""}`}>
               <button
                 className="back-to-contests-btn"
-                onClick={() => setViewMode("list")}
+                onClick={() => {
+                  setViewMode("list");
+                  setSearchParams(prev => {
+                    prev.delete("contest");
+                    return prev;
+                  });
+                  setSelectedContest(null);
+                }}
               >
                 <ChevronLeft size={14} /> Back to Contests
               </button>

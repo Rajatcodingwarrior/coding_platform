@@ -64,7 +64,7 @@ export const Navbar = () => {
               style={{ padding: "0.4rem 0.8rem", fontSize: "0.85rem", gap: "0.4rem" }}
             >
               <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
-              {syncing ? "Syncing..." : "Sync CF"}
+              {syncing ? "Syncing..." : "Sync Contests"}
             </button>
 
             <span style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
@@ -128,7 +128,7 @@ export const Navbar = () => {
                   style={{ width: "100%", padding: "0.6rem 1rem", fontSize: "0.85rem", gap: "0.4rem" }}
                 >
                   <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
-                  {syncing ? "Syncing..." : "Sync CF"}
+                  {syncing ? "Syncing..." : "Sync Contests"}
                 </button>
 
                 <button 
