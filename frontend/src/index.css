@@ -558,6 +558,400 @@ input:focus, textarea:focus {
   gap: 2rem;
 }
 
+/* ── 991px: Tablet breakpoint ── */
+@media (max-width: 991px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .contests-grid {
+    gap: 1.25rem;
+  }
+  
+  .sample-case-body {
+    grid-template-columns: 1fr;
+  }
+  
+  .sample-case-col:first-child {
+    border-right: none;
+    border-bottom: 1px solid #2e2e2e;
+  }
+
+  .back-to-contests-btn {
+    display: inline-flex;
+  }
+  
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .contests-list-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── 768px: Mobile breakpoint ── */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  .dashboard-container {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+  
+  .contests-container {
+    padding-top: 1rem;
+    padding-bottom: 1.5rem;
+  }
+  
+  .glass-card {
+    padding: 1rem !important;
+    border-radius: var(--radius-sm) !important;
+  }
+  
+  h2 {
+    font-size: 1.35rem !important;
+  }
+  
+  h3 {
+    font-size: 1rem !important;
+  }
+
+  /* Navbar collapses to burger menu */
+  .navbar-header .nav-links {
+    display: none;
+  }
+
+  .mobile-nav-toggle {
+    display: block;
+  }
+
+  .mobile-nav-menu {
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(26, 26, 26, 0.97);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 1.25rem 1.25rem;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.75rem;
+    position: absolute;
+    top: 58px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    animation: fadeIn var(--transition-fast);
+  }
+
+  .mobile-nav-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 0.65rem 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast), background var(--transition-fast);
+  }
+
+  .mobile-nav-link:hover, .mobile-nav-link.active {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  /* Filter pills scroll horizontally */
+  .filter-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    scrollbar-width: none;
+  }
+  .filter-pills::-webkit-scrollbar {
+    display: none;
+  }
+  .filter-pill {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.78rem;
+  }
+
+  /* Data tables compact */
+  .data-table th, .data-table td {
+    padding: 0.65rem 0.6rem;
+    font-size: 0.82rem;
+  }
+  .data-table th {
+    font-size: 0.72rem;
+  }
+}
+
+/* Navbar mobile toggle base */
+.mobile-nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-main);
+  padding: 0.35rem;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.mobile-nav-toggle:hover {
+  color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* IDE Mobile layout & tabs */
+.mobile-pane-tabs {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .ide-wrapper {
+    grid-template-columns: 1fr;
+    height: calc(100vh - 58px - 42px);
+    height: calc(100dvh - 58px - 42px);
+  }
+
+  .pane-left, .pane-right {
+    display: none;
+  }
+
+  .pane-left.mobile-active, .pane-right.mobile-active {
+    display: flex;
+  }
+
+  .mobile-pane-tabs {
+    display: flex;
+    height: 42px;
+    background-color: rgba(26, 26, 26, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+  }
+
+  .mobile-pane-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    border-bottom: 2px solid transparent;
+    transition: all var(--transition-fast);
+    font-family: var(--font-sans);
+  }
+
+  .mobile-pane-tab:hover {
+    color: var(--text-main);
+  }
+
+  .mobile-pane-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+    background-color: rgba(255, 161, 22, 0.04);
+    font-weight: 700;
+  }
+}
+
+/* ── 576px: Small mobile ── */
+@media (max-width: 576px) {
+  .container {
+    padding: 0 0.75rem;
+  }
+
+  /* Hide redundant table columns */
+  .data-table th:nth-child(3), .data-table td:nth-child(3),
+  .data-table th:nth-child(6), .data-table td:nth-child(6) {
+    display: none;
+  }
+
+  .data-table th, .data-table td {
+    padding: 0.55rem 0.4rem;
+    font-size: 0.78rem;
+  }
+
+  /* Auth pages full width */
+  .auth-page-container {
+    padding: 0.75rem;
+  }
+  .auth-card,
+  .auth-card-signup {
+    padding: 1.25rem;
+    max-width: 100%;
+  }
+
+  /* Welcome banner compact */
+  .dashboard-container h2 {
+    font-size: 1.2rem !important;
+  }
+
+  /* Badges & tags smaller */
+  .badge {
+    padding: 0.2rem 0.45rem;
+    font-size: 0.65rem;
+  }
+  .platform-badge {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.62rem;
+  }
+  .rating-tag {
+    padding: 0.15rem 0.35rem;
+    font-size: 0.68rem;
+  }
+  .problem-tag {
+    padding: 0.1rem 0.35rem;
+    font-size: 0.62rem;
+  }
+}
+
+/* ── 480px: Extra small mobile (portrait phones) ── */
+@media (max-width: 480px) {
+  .pane-header .tab-label,
+  .pane-header .btn-label {
+    display: none !important;
+  }
+  .pane-header {
+    padding: 0 0.4rem !important;
+    gap: 0.4rem !important;
+  }
+  .pane-tab {
+    padding: 0 0.4rem !important;
+    font-size: 0.75rem !important;
+  }
+  .stopwatch-widget {
+    padding: 0.15rem 0.35rem !important;
+    gap: 0.25rem !important;
+  }
+  .stopwatch-display {
+    font-size: 0.78rem;
+    min-width: 60px;
+  }
+
+  .editor-footer {
+    height: 44px;
+    padding: 0 0.5rem;
+  }
+  .editor-footer .btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.72rem;
+  }
+
+  /* Contests cards */
+  .contests-list-wrapper {
+    gap: 0.5rem;
+  }
+}
+
+/* Page containers padding & min-height */
+.dashboard-container {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+  min-height: calc(100vh - 58px);
+  min-height: calc(100dvh - 58px);
+}
+.contests-container {
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+  min-height: calc(100vh - 58px);
+  min-height: calc(100dvh - 58px);
+}
+
+/* Prevent grid items from stretching beyond viewport width */
+.dashboard-grid > div,
+.contests-grid > div {
+  min-width: 0;
+}
+
+/* Auth page container and card styles */
+.auth-page-container {
+  padding: 2rem;
+  width: 100%;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+}
+
+.auth-card-signup {
+  width: 100%;
+  max-width: 440px;
+  padding: 2.5rem;
+}
+
+/* Problem title block responsiveness */
+.problem-title-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+.problem-title {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+
+@media (max-width: 576px) {
+  .problem-title-header {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .problem-title {
+    font-size: 1.05rem;
+  }
+}
+
+/* Mobile master-detail view classes */
+.back-to-contests-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0 0.75rem 0;
+  font-family: var(--font-sans);
+  transition: opacity var(--transition-fast);
+}
+
+.back-to-contests-btn:hover {
+  opacity: 0.8;
+}
+
+/* Contests list cards grid layout */
+.contests-list-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.8rem;
+  width: 100%;
+}
+
+
 /* Responsive grid layouts */
 @media (max-width: 991px) {
   .dashboard-grid {
