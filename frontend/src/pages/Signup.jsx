@@ -54,7 +54,7 @@ export const Signup = () => {
           </div>
           <h2>Create Account</h2>
           <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginTop: "0.5rem" }}>
-            Get started on CFCodeSpace
+            Get started on CodeVerse
           </p>
         </div>
 

@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 import { Terminal, LogOut, RefreshCw, BarChart2, BookOpen, Menu, X, Calendar } from "lucide-react";
+import { Logo } from "./Logo";
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
@@ -30,9 +31,9 @@ export const Navbar = () => {
   return (
     <header className="navbar-header">
       <div className="container navbar-container">
-        <Link to="/" className="nav-logo" onClick={() => setMobileMenuOpen(false)}>
-          <Terminal className="nav-logo-icon" size={24} />
-          <span>CF<span style={{ color: "var(--color-primary)" }}>CodeSpace</span></span>
+        <Link to="/" className="nav-logo" onClick={() => setMobileMenuOpen(false)} style={{ gap: "0.8rem" }}>
+          <Logo size={26} />
+          <span style={{ letterSpacing: "-0.01em" }}>Code<span style={{ color: "var(--color-primary)", fontWeight: "800" }}>Verse</span></span>
         </Link>
 
         {/* Mobile menu toggle */}
