@@ -189,14 +189,16 @@ export const Contests = () => {
     <div style={{ background: "var(--bg-deep)" }}>
       <div className="container contests-container">
 
-        {/* ── Page header ── */}
-        <div style={{ marginBottom: "clamp(1rem, 3vw, 1.75rem)" }}>
-          <h2 style={{ fontSize: "clamp(1.15rem, 4vw, 1.6rem)", fontWeight: 700, marginBottom: "0.4rem" }}>
-            Contest Problems
-          </h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "clamp(0.8rem, 2.5vw, 0.92rem)" }}>
-            Latest problems from Codeforces, LeetCode, CodeChef &amp; AtCoder — all in one place.
-          </p>
+        {/* ── Page header banner ── */}
+        <div className="glass-card welcome-banner animate-fade" style={{ marginBottom: "2rem" }}>
+          <div>
+            <h2 style={{ fontSize: "clamp(1.2rem, 4vw, 1.7rem)", fontWeight: 700, marginBottom: "0.35rem" }}>
+              Practice Contests &amp; Problems
+            </h2>
+            <p style={{ color: "var(--text-muted)", fontSize: "clamp(0.8rem, 2.5vw, 0.95rem)", maxWidth: "600px", lineHeight: "1.5" }}>
+              Sharpen your algorithmic skills by solving curated problems from past Codeforces, LeetCode, CodeChef, and AtCoder contests.
+            </p>
+          </div>
         </div>
 
         {/* ── Platform filter pills ── */}
@@ -263,18 +265,12 @@ export const Contests = () => {
                     <div
                       key={c.id}
                       onClick={() => handleSelectContest(c)}
-                      className="glass-card"
-                      style={{
-                        padding: "1rem 1.1rem", cursor: "pointer",
-                        borderColor: isSelected ? dotColor : "var(--border-color)",
-                        backgroundColor: isSelected ? `rgba(${platform === "codeforces" ? "255,76,76" : platform === "leetcode" ? "255,161,22" : platform === "codechef" ? "185,125,75" : "91,139,255"}, 0.05)` : "var(--bg-main)",
-                        transition: "all 0.18s ease"
-                      }}
+                      className={`contest-sidebar-card platform-${platform} ${isSelected ? "active" : ""}`}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.45rem" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.2rem" }}>
                         <PlatformBadge platform={platform} />
                         <h4 style={{
-                          color: isSelected ? "var(--text-main)" : "var(--text-main)",
+                          color: "var(--text-main)",
                           fontSize: "0.87rem", fontWeight: 600, lineHeight: 1.3,
                           overflow: "hidden", display: "-webkit-box",
                           WebkitLineClamp: 2, WebkitBoxOrient: "vertical"
@@ -282,7 +278,7 @@ export const Contests = () => {
                           {c.name}
                         </h4>
                       </div>
-                      <div style={{ display: "flex", gap: "1rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                      <div style={{ display: "flex", gap: "0.75rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
                         <span style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
                           <Calendar size={10} /> {formatDate(c.start_time_seconds)}
                         </span>
@@ -298,7 +294,7 @@ export const Contests = () => {
           </div>
 
           {/* Right: Problems table */}
-          {selectedContest && (
+          {selectedContest ? (
             <div className={`contests-problems-pane ${viewMode === "list" ? "mobile-hidden" : ""}`}>
               <button
                 className="back-to-contests-btn"
@@ -400,7 +396,7 @@ export const Contests = () => {
                           <tr
                             key={q.id}
                             onClick={() => navigate(`/problem/${q.id}`)}
-                            style={{ cursor: "pointer" }}
+                            className="problem-row"
                           >
                             <td>
                               {q.is_solved
@@ -453,6 +449,41 @@ export const Contests = () => {
                   </div>
                 </div>
               )}
+            </div>
+          ) : (
+            <div className="contests-problems-pane mobile-hidden" style={{ flex: 1 }}>
+              <div className="glass-card flex-center animate-fade" style={{ 
+                padding: "5rem 2rem", 
+                textAlign: "center", 
+                flexDirection: "column",
+                gap: "1.25rem",
+                background: "linear-gradient(135deg, rgba(255, 161, 22, 0.015) 0%, rgba(56, 148, 255, 0.015) 100%)",
+                minHeight: "400px",
+                justifyContent: "center",
+                borderStyle: "dashed"
+              }}>
+                <div style={{
+                  width: "64px",
+                  height: "64px",
+                  borderRadius: "50%",
+                  background: "rgba(255, 255, 255, 0.02)",
+                  border: "1px solid rgba(255, 255, 255, 0.06)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "var(--color-primary)",
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
+                  marginBottom: "0.5rem"
+                }}>
+                  <BookOpen size={28} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: "1.25rem", color: "var(--text-main)", marginBottom: "0.5rem", fontWeight: "600" }}>No Contest Selected</h3>
+                  <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", maxWidth: "340px", margin: "0 auto", lineHeight: "1.6" }}>
+                    Select a competition from the sidebar list to view its problems, view exact ratings, filter by tags, and start coding.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>

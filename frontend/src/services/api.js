@@ -11,11 +11,23 @@ const getHeaders = () => {
   return headers;
 };
 
+// Global interceptor to handle 401 Unauthorized errors (stale/expired tokens)
+const apiFetch = async (url, options = {}) => {
+  const res = await fetch(url, options);
+  if (res.status === 401 && !url.includes("/auth/login") && !url.includes("/auth/signup")) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+    throw new Error("Unauthorized - Session expired");
+  }
+  return res;
+};
+
 export const api = {
   // Authentication
   auth: {
     signup: async (username, email, password) => {
-      const res = await fetch(`${API_BASE_URL}/auth/signup`, {
+      const res = await apiFetch(`${API_BASE_URL}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
@@ -27,7 +39,7 @@ export const api = {
       return res.json();
     },
     login: async (username, password) => {
-      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+      const res = await apiFetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -40,7 +52,7 @@ export const api = {
     },
     logout: async () => {
       try {
-        await fetch(`${API_BASE_URL}/auth/logout`, {
+        await apiFetch(`${API_BASE_URL}/auth/logout`, {
           method: "POST",
           headers: getHeaders(),
         });
@@ -51,7 +63,7 @@ export const api = {
       localStorage.removeItem("user");
     },
     me: async () => {
-      const res = await fetch(`${API_BASE_URL}/auth/me`, {
+      const res = await apiFetch(`${API_BASE_URL}/auth/me`, {
         method: "GET",
         headers: getHeaders(),
       });
@@ -65,7 +77,7 @@ export const api = {
   // Contests & Questions
   contests: {
     list: async () => {
-      const res = await fetch(`${API_BASE_URL}/contests`, {
+      const res = await apiFetch(`${API_BASE_URL}/contests`, {
         method: "GET",
         headers: getHeaders(),
       });
@@ -73,7 +85,7 @@ export const api = {
       return res.json();
     },
     getQuestions: async (contestId) => {
-      const res = await fetch(`${API_BASE_URL}/contests/${contestId}/questions`, {
+      const res = await apiFetch(`${API_BASE_URL}/contests/${contestId}/questions`, {
         method: "GET",
         headers: getHeaders(),
       });
@@ -81,7 +93,7 @@ export const api = {
       return res.json();
     },
     sync: async () => {
-      const res = await fetch(`${API_BASE_URL}/contests/sync`, {
+      const res = await apiFetch(`${API_BASE_URL}/contests/sync`, {
         method: "POST",
         headers: getHeaders(),
       });
@@ -89,7 +101,7 @@ export const api = {
       return res.json();
     },
     upcoming: async () => {
-      const res = await fetch(`${API_BASE_URL}/contests/upcoming`, {
+      const res = await apiFetch(`${API_BASE_URL}/contests/upcoming`, {
         method: "GET",
         headers: getHeaders(),
       });
@@ -100,7 +112,7 @@ export const api = {
 
   questions: {
     get: async (questionId) => {
-      const res = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
+      const res = await apiFetch(`${API_BASE_URL}/questions/${questionId}`, {
         method: "GET",
         headers: getHeaders(),
       });
@@ -112,7 +124,7 @@ export const api = {
   // Compiler / Run code
   compiler: {
     run: async (code, stdin) => {
-      const res = await fetch(`${API_BASE_URL}/compiler/run`, {
+      const res = await apiFetch(`${API_BASE_URL}/compiler/run`, {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ code, stdin }),
@@ -121,7 +133,7 @@ export const api = {
       return res.json();
     },
     submit: async (questionId, code) => {
-      const res = await fetch(`${API_BASE_URL}/compiler/submit`, {
+      const res = await apiFetch(`${API_BASE_URL}/compiler/submit`, {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ question_id: questionId, code }),
@@ -130,7 +142,7 @@ export const api = {
       return res.json();
     },
     aiHint: async (questionId, code, compileError) => {
-      const res = await fetch(`${API_BASE_URL}/compiler/ai-hint`, {
+      const res = await apiFetch(`${API_BASE_URL}/compiler/ai-hint`, {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ question_id: questionId, code, compile_error: compileError }),
@@ -143,7 +155,7 @@ export const api = {
   // Dashboard / Progress
   dashboard: {
     stats: async () => {
-      const res = await fetch(`${API_BASE_URL}/dashboard/stats`, {
+      const res = await apiFetch(`${API_BASE_URL}/dashboard/stats`, {
         method: "GET",
         headers: getHeaders(),
       });
@@ -151,7 +163,7 @@ export const api = {
       return res.json();
     },
     chooseForMe: async () => {
-      const res = await fetch(`${API_BASE_URL}/dashboard/choose-for-me`, {
+      const res = await apiFetch(`${API_BASE_URL}/dashboard/choose-for-me`, {
         method: "GET",
         headers: getHeaders(),
       });
@@ -159,7 +171,7 @@ export const api = {
       return res.json();
     },
     toggleFavorite: async (questionId, isFavorite) => {
-      const res = await fetch(`${API_BASE_URL}/dashboard/questions/${questionId}/favorite`, {
+      const res = await apiFetch(`${API_BASE_URL}/dashboard/questions/${questionId}/favorite`, {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ is_favorite: isFavorite }),
@@ -168,7 +180,7 @@ export const api = {
       return res.json();
     },
     toggleComplete: async (questionId, isSolved) => {
-      const res = await fetch(`${API_BASE_URL}/dashboard/questions/${questionId}/complete`, {
+      const res = await apiFetch(`${API_BASE_URL}/dashboard/questions/${questionId}/complete`, {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ is_solved: isSolved }),

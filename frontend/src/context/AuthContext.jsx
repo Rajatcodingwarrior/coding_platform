@@ -8,12 +8,24 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    if (storedUser && token) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const initializeAuth = async () => {
+      const storedUser = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
+      if (storedUser && token) {
+        try {
+          // Verify token against backend
+          const currentUser = await api.auth.me();
+          setUser(currentUser);
+        } catch (err) {
+          console.error("Session verification failed, logging out:", err);
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser(null);
+        }
+      }
+      setLoading(false);
+    };
+    initializeAuth();
   }, []);
 
   const login = async (username, password) => {

@@ -32,7 +32,7 @@ export const Login = () => {
           <div className="flex-center" style={{ 
             width: "50px", 
             height: "50px", 
-            backgroundColor: "rgba(255, 161, 22, 0.1)", 
+            backgroundColor: "rgba(99, 102, 241, 0.1)", 
             color: "var(--color-primary)",
             borderRadius: "50%",
             margin: "0 auto 1rem auto"

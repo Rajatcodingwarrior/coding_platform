@@ -57,7 +57,7 @@ const ActivityHeatmap = ({ activities }) => {
   ];
 
   return (
-    <div className="glass-card" style={{ padding: "clamp(0.75rem, 3vw, 1.5rem)", marginBottom: "clamp(1rem, 3vw, 2rem)" }}>
+    <div className="glass-card" style={{ padding: "clamp(0.75rem, 3vw, 1.5rem)", marginBottom: "clamp(1rem, 3vw, 2rem)", overflow: "hidden" }}>
       <h3 style={{ fontSize: "clamp(0.85rem, 2.5vw, 1.05rem)", fontWeight: "600", color: "var(--text-main)", marginBottom: "0.75rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
         <BarChart size={16} style={{ color: "var(--color-primary)" }} />
         <span>Submissions Activity</span>
@@ -81,7 +81,8 @@ const ActivityHeatmap = ({ activities }) => {
           gridAutoFlow: "column",
           gridTemplateRows: "repeat(7, 10px)",
           gridAutoColumns: "10px",
-          gap: "3px"
+          gap: "3px",
+          flexShrink: 0
         }}>
           {days.map((day, idx) => (
             <div
@@ -172,16 +173,7 @@ export const Dashboard = () => {
   return (
     <div className="container dashboard-container">
       {/* Welcome banner */}
-      <div className="glass-card animate-fade" style={{ 
-        padding: "clamp(0.75rem, 3vw, 2rem)", 
-        marginBottom: "clamp(0.75rem, 2vw, 1.5rem)", 
-        background: "linear-gradient(135deg, rgba(255, 161, 22, 0.08) 0%, rgba(13, 110, 253, 0) 100%)",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: "0.75rem"
-      }}>
+      <div className="glass-card welcome-banner animate-fade">
         <div>
           <h2 style={{ fontSize: "clamp(1.15rem, 4vw, 1.75rem)", marginBottom: "0.35rem" }}>
             Welcome back, <span style={{ color: "var(--color-primary)" }}>{user.username}</span>!
@@ -193,8 +185,8 @@ export const Dashboard = () => {
         <button 
           onClick={handleChooseForMe}
           disabled={choosing || !stats || stats.total_questions === 0}
-          className="btn btn-primary flex-center"
-          style={{ gap: "0.4rem", fontSize: "clamp(0.78rem, 2.5vw, 0.9rem)", padding: "0.5rem 1rem", whiteSpace: "nowrap", flex: "0 0 auto" }}
+          className="btn btn-primary flex-center dashboard-choose-btn"
+          style={{ gap: "0.4rem", fontSize: "clamp(0.78rem, 2.5vw, 0.9rem)", padding: "0.5rem 1.25rem" }}
         >
           <Shuffle size={18} />
           {choosing ? "Choosing..." : "Choose for me"}
@@ -212,7 +204,7 @@ export const Dashboard = () => {
 
           <div className="glass-card" style={{ padding: "clamp(0.75rem, 3vw, 1.5rem)" }}>
             {/* Circular Progress & Key stats */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "clamp(1rem, 3vw, 1.75rem)", gap: "1rem" }}>
+            <div className="stats-header-flex">
               <div style={{ position: "relative", width: "80px", height: "80px", display: "flex", justifyContent: "center", alignItems: "center", flexShrink: 0 }}>
                 {/* SVG Progress Ring */}
                 <svg width="80" height="80" viewBox="0 0 90 90" style={{ transform: "rotate(-90deg)", position: "absolute" }}>
@@ -352,7 +344,7 @@ export const Dashboard = () => {
                         onClick={() => navigate(`/problem/${q.id}`)}
                         style={{ cursor: "pointer" }}
                       >
-                        <td style={{ fontWeight: "500" }}>
+                        <td style={{ fontWeight: "500", wordBreak: "break-word", overflowWrap: "anywhere", whiteSpace: "normal" }}>
                           {q.contest_id}{q.index}. {q.name}
                           <div className="tag-list">
                             {q.tags.slice(0, 2).map((t, idx) => (

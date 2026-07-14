@@ -28,7 +28,7 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="navbar-header" style={{ position: "relative" }}>
+    <header className="navbar-header">
       <div className="container navbar-container">
         <Link to="/" className="nav-logo" onClick={() => setMobileMenuOpen(false)}>
           <Terminal className="nav-logo-icon" size={24} />
