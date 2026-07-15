@@ -4,7 +4,7 @@ import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { 
   Award, CheckCircle2, Star, Shuffle, BookOpen, Clock, 
-  ArrowRight, Heart, RefreshCw, BarChart 
+  ArrowRight, Heart, RefreshCw, BarChart, WifiOff 
 } from "lucide-react";
 
 const ActivityHeatmap = ({ activities }) => {
@@ -119,6 +119,18 @@ export const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [choosing, setChoosing] = useState(false);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     fetchStats();
@@ -129,8 +141,15 @@ export const Dashboard = () => {
     try {
       const data = await api.dashboard.stats();
       setStats(data);
+      localStorage.setItem("codeverse_stats", JSON.stringify(data));
+      setIsOffline(false);
     } catch (e) {
       console.error("Failed to load dashboard statistics:", e);
+      const cached = localStorage.getItem("codeverse_stats");
+      if (cached) {
+        setStats(JSON.parse(cached));
+        setIsOffline(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -172,6 +191,25 @@ export const Dashboard = () => {
 
   return (
     <div className="container dashboard-container">
+      {/* Offline notification banner */}
+      {isOffline && (
+        <div style={{
+          background: "var(--color-error-bg)",
+          color: "#fda4af",
+          border: "1px solid rgba(244, 63, 94, 0.25)",
+          padding: "0.75rem 1.25rem",
+          borderRadius: "var(--radius-md)",
+          marginBottom: "1.5rem",
+          fontSize: "0.85rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.6rem"
+        }}>
+          <WifiOff size={16} style={{ color: "#f43f5e" }} />
+          <span>You are currently offline. Displaying cached dashboard statistics from your last visit.</span>
+        </div>
+      )}
+
       {/* Welcome banner */}
       <div className="glass-card welcome-banner animate-fade">
         <div>

@@ -1123,3 +1123,11 @@ input:focus, textarea:focus {
   gap: 0.8rem;
   width: 100%;
 }
+
+.upcoming-title-link {
+  transition: color var(--transition-fast);
+}
+.upcoming-title-link:hover {
+  color: var(--color-primary) !important;
+  text-decoration: underline !important;
+}

@@ -110,6 +110,25 @@ export const UpcomingContests = () => {
     });
   };
 
+  const getContestLink = (c) => {
+    const platform = c.platform;
+    const originalId = c.id.includes("_") ? c.id.split("_").slice(1).join("_") : c.id;
+    
+    if (platform === "codeforces") {
+      return `https://codeforces.com/contests/${originalId}`;
+    }
+    if (platform === "leetcode") {
+      return `https://leetcode.com/contest/${originalId}`;
+    }
+    if (platform === "codechef") {
+      return `https://www.codechef.com/${originalId}`;
+    }
+    if (platform === "atcoder") {
+      return `https://atcoder.jp/contests/${originalId}`;
+    }
+    return "#";
+  };
+
   const filteredContests = contests.filter(c => 
     filterPlatform === "all" || c.platform === filterPlatform
   );
@@ -209,18 +228,26 @@ export const UpcomingContests = () => {
                       {cfg.label}
                     </span>
                     <a 
-                      href={cfg.url} 
+                      href={getContestLink(c)} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      style={{ color: "var(--text-muted)" }}
-                      title="Visit Platform"
+                      style={{ color: "var(--text-muted)", display: "flex", alignItems: "center" }}
+                      title="Register / View Contest"
                     >
                       <ExternalLink size={14} />
                     </a>
                   </div>
                   
                   <h3 style={{ fontSize: "1.05rem", fontWeight: "700", lineHeight: "1.4", color: "var(--text-main)", marginBottom: "0.75rem" }}>
-                    {c.name}
+                    <a 
+                      href={getContestLink(c)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "inherit", textDecoration: "none" }}
+                      className="upcoming-title-link"
+                    >
+                      {c.name}
+                    </a>
                   </h3>
                 </div>
 
