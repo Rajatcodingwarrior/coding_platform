@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
-import { BookOpen, CheckCircle, Circle, Star, Calendar, Clock, ChevronRight, ChevronLeft, RefreshCw, Zap } from "lucide-react";
+import { BookOpen, CheckCircle, Circle, Star, Calendar, Clock, ChevronRight, ChevronLeft, RefreshCw, Zap, WifiOff } from "lucide-react";
 
 const PLATFORM_CFG = {
   all:         { label: "All",        pill: "active",    dot: "#9ba3af" },
@@ -60,7 +60,19 @@ export const Contests = () => {
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [platformFilter, setPlatformFilter]   = useState(urlPlatform);
   const [viewMode, setViewMode]               = useState(urlContestId ? "problems" : "list"); // "list" or "problems" on mobile
+  const [isOffline, setIsOffline]             = useState(!navigator.onLine);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   const getGoogleCalendarLink = (contest) => {
     const title = encodeURIComponent(contest.name);
@@ -113,6 +125,8 @@ export const Contests = () => {
       try {
         const data = await api.contests.list();
         setContests(data);
+        localStorage.setItem("codeverse_contests", JSON.stringify(data));
+        setIsOffline(false);
         
         if (urlContestId) {
           const matched = data.find(c => c.id === urlContestId);
@@ -123,8 +137,13 @@ export const Contests = () => {
             try {
               const qData = await api.contests.getQuestions(matched.id);
               setQuestions(qData);
+              localStorage.setItem(`codeverse_questions_${matched.id}`, JSON.stringify(qData));
             } catch (e) {
               console.error("Failed to fetch questions for auto-selected contest:", e);
+              const cachedQs = localStorage.getItem(`codeverse_questions_${matched.id}`);
+              if (cachedQs) {
+                setQuestions(JSON.parse(cachedQs));
+              }
             } finally {
               setLoadingQuestions(false);
             }
@@ -132,6 +151,24 @@ export const Contests = () => {
         }
       } catch (e) {
         console.error(e);
+        const cachedContests = localStorage.getItem("codeverse_contests");
+        if (cachedContests) {
+          const parsedContests = JSON.parse(cachedContests);
+          setContests(parsedContests);
+          setIsOffline(true);
+          
+          if (urlContestId) {
+            const matched = parsedContests.find(c => c.id === urlContestId);
+            if (matched) {
+              setSelectedContest(matched);
+              setViewMode("problems");
+              const cachedQs = localStorage.getItem(`codeverse_questions_${matched.id}`);
+              if (cachedQs) {
+                setQuestions(JSON.parse(cachedQs));
+              }
+            }
+          }
+        }
       } finally {
         setLoadingContests(false);
       }
@@ -152,7 +189,16 @@ export const Contests = () => {
     try {
       const qData = await api.contests.getQuestions(contest.id);
       setQuestions(qData);
-    } catch (e) { console.error(e); }
+      localStorage.setItem(`codeverse_questions_${contest.id}`, JSON.stringify(qData));
+      setIsOffline(false);
+    } catch (e) {
+      console.error(e);
+      const cachedQs = localStorage.getItem(`codeverse_questions_${contest.id}`);
+      if (cachedQs) {
+        setQuestions(JSON.parse(cachedQs));
+        setIsOffline(true);
+      }
+    }
     finally { setLoadingQuestions(false); }
   };
 
@@ -188,6 +234,24 @@ export const Contests = () => {
   return (
     <div style={{ background: "var(--bg-deep)" }}>
       <div className="container contests-container">
+        {/* Offline notification banner */}
+        {isOffline && (
+          <div style={{
+            background: "var(--color-error-bg)",
+            color: "#fda4af",
+            border: "1px solid rgba(244, 63, 94, 0.25)",
+            padding: "0.75rem 1.25rem",
+            borderRadius: "var(--radius-md)",
+            marginBottom: "1.5rem",
+            fontSize: "0.85rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem"
+          }}>
+            <WifiOff size={16} style={{ color: "#f43f5e" }} />
+            <span>You are currently offline. Displaying cached contests and questions.</span>
+          </div>
+        )}
 
         {/* ── Page header banner ── */}
         <div className="glass-card welcome-banner animate-fade" style={{ marginBottom: "2rem" }}>

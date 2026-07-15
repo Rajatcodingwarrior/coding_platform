@@ -15,6 +15,18 @@ export const UpcomingContests = () => {
   const [loading, setLoading] = useState(true);
   const [filterPlatform, setFilterPlatform] = useState("all");
   const [now, setNow] = useState(Math.floor(Date.now() / 1000));
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   // Fetch upcoming contests
   const fetchUpcoming = async () => {
@@ -22,8 +34,15 @@ export const UpcomingContests = () => {
     try {
       const data = await api.contests.upcoming();
       setContests(data);
+      localStorage.setItem("codeverse_upcoming_contests", JSON.stringify(data));
+      setIsOffline(false);
     } catch (e) {
       console.error("Failed to load upcoming contests:", e);
+      const cached = localStorage.getItem("codeverse_upcoming_contests");
+      if (cached) {
+        setContests(JSON.parse(cached));
+        setIsOffline(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -135,6 +154,25 @@ export const UpcomingContests = () => {
 
   return (
     <div className="container contests-container">
+      {/* Offline notification banner */}
+      {isOffline && (
+        <div style={{
+          background: "var(--color-error-bg)",
+          color: "#fda4af",
+          border: "1px solid rgba(244, 63, 94, 0.25)",
+          padding: "0.75rem 1.25rem",
+          borderRadius: "var(--radius-md)",
+          marginBottom: "1.5rem",
+          fontSize: "0.85rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.6rem"
+        }}>
+          <WifiOff size={16} style={{ color: "#f43f5e" }} />
+          <span>You are currently offline. Displaying cached upcoming contest calendar.</span>
+        </div>
+      )}
+
       {/* Header section */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "clamp(1rem, 3vw, 2rem)", flexWrap: "wrap", gap: "1rem" }}>
         <div>
