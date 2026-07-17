@@ -30,9 +30,15 @@ app = FastAPI(
 
 # Configure CORS dynamically from settings
 origins = [origin.strip() for origin in settings.CORS_ALLOWED_ORIGINS.split(",") if origin.strip()]
+
+# Starlette throws a RuntimeError if allow_origins=['*'] is used with allow_credentials=True.
+# We solve this by using allow_origin_regex when a wildcard is present, which dynamically matches any origin.
+allow_all_origins = "*" in origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=[] if allow_all_origins else origins,
+    allow_origin_regex=".*" if allow_all_origins else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
